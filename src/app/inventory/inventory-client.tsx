@@ -43,7 +43,11 @@ export function InventoryClient({
 }) {
   const router = useRouter();
   const { toast } = useToast();
-  const [tyres] = React.useState(initialTyres);
+  const [tyres, setTyres] = React.useState(initialTyres);
+  // Keep client state in sync after server mutations + router.refresh()
+  React.useEffect(() => {
+    setTyres(initialTyres);
+  }, [initialTyres]);
   const [search, setSearch] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState<TyreStatus | "ALL">("ALL");
   const [statusTarget, setStatusTarget] = React.useState<Tyre | null>(null);
@@ -71,7 +75,7 @@ export function InventoryClient({
     return {
       available: count("AVAILABLE"),
       installed: count("INSTALLED"),
-      removed: count("REMOVED"),
+      removed: count("REMOVED") + count("SCRAPPED") + count("WORN_OUT"),
       total: tyres.length,
     };
   }, [tyres]);

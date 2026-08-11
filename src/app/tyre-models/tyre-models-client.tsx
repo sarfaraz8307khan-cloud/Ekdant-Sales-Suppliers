@@ -45,7 +45,11 @@ export function TyreModelsClient({
 }) {
   const router = useRouter();
   const { toast } = useToast();
-  const [models] = React.useState(initialModels);
+  const [models, setModels] = React.useState(initialModels);
+  // Keep client state in sync after server mutations + router.refresh()
+  React.useEffect(() => {
+    setModels(initialModels);
+  }, [initialModels]);
   const [search, setSearch] = React.useState("");
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [editing, setEditing] = React.useState<TyreModel | null>(null);

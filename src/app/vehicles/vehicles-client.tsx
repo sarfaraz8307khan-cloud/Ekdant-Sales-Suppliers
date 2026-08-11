@@ -51,7 +51,11 @@ export function VehiclesClient({
   const { toast } = useToast();
   const intent: "install" | "replace" | null =
     action === "install" ? "install" : action === "replace" ? "replace" : null;
-  const [vehicles] = React.useState(initialVehicles);
+  const [vehicles, setVehicles] = React.useState(initialVehicles);
+  // Keep client state in sync after server mutations + router.refresh()
+  React.useEffect(() => {
+    setVehicles(initialVehicles);
+  }, [initialVehicles]);
   const [working, setWorking] = React.useState<Vehicle | null>(null);
   const [workingLoading, setWorkingLoading] = React.useState(false);
   const startIntent = (v: Vehicle) => {

@@ -1,4 +1,7 @@
+"use client";
+
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { Icon } from "./icon";
 import { Button } from "./button";
 import { cn } from "@/lib/utils";
@@ -18,17 +21,23 @@ export function PageHeader({
   actionIcon?: string;
   backHref?: string;
 }) {
+  const router = useRouter();
+  const handleBack = () => {
+    if (backHref) router.push(backHref);
+  };
   return (
     <div className="flex items-start justify-between gap-3 mb-5">
       <div className="flex items-start gap-3 min-w-0">
         {backHref && (
-          <a
-            href={backHref}
-            className="p-2 -m-2 rounded-lg hover:bg-muted-soft transition-colors shrink-0"
+          <button
+            type="button"
+            onClick={handleBack}
+            className="inline-flex items-center gap-1.5 p-2 -m-2 min-h-11 rounded-lg text-sm font-medium text-foreground hover:bg-muted-soft transition-colors shrink-0"
             aria-label="Go back"
           >
             <Icon name="arrow-left" size={20} />
-          </a>
+            <span className="hidden sm:inline">Back</span>
+          </button>
         )}
         <div className="min-w-0">
           <h1 className="text-xl sm:text-2xl font-bold text-foreground truncate">

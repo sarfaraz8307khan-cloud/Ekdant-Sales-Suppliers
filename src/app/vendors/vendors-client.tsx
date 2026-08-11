@@ -40,7 +40,11 @@ const emptyForm: VendorFormData = {
 export function VendorsClient({ initialVendors }: { initialVendors: Vendor[] }) {
   const router = useRouter();
   const { toast } = useToast();
-  const [vendors] = React.useState(initialVendors);
+  const [vendors, setVendors] = React.useState(initialVendors);
+  // Keep client state in sync after server mutations + router.refresh()
+  React.useEffect(() => {
+    setVendors(initialVendors);
+  }, [initialVendors]);
   const [search, setSearch] = React.useState("");
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [editing, setEditing] = React.useState<Vendor | null>(null);

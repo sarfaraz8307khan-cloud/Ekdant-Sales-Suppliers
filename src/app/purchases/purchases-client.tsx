@@ -73,7 +73,11 @@ export function PurchasesClient({
 }) {
   const router = useRouter();
   const { toast } = useToast();
-  const [purchases] = React.useState(initialPurchases);
+  const [purchases, setPurchases] = React.useState(initialPurchases);
+  // Keep client state in sync after server mutations + router.refresh()
+  React.useEffect(() => {
+    setPurchases(initialPurchases);
+  }, [initialPurchases]);
   const [modalOpen, setModalOpen] = React.useState(false);
   const [submitting, setSubmitting] = React.useState(false);
   const [errors, setErrors] = React.useState<Record<string, string>>({});

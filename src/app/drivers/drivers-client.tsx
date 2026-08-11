@@ -36,7 +36,11 @@ const emptyForm: DriverFormData = {
 export function DriversClient({ initialDrivers }: { initialDrivers: Driver[] }) {
   const router = useRouter();
   const { toast } = useToast();
-  const [drivers] = React.useState(initialDrivers);
+  const [drivers, setDrivers] = React.useState(initialDrivers);
+  // Keep client state in sync after server mutations + router.refresh()
+  React.useEffect(() => {
+    setDrivers(initialDrivers);
+  }, [initialDrivers]);
   const [search, setSearch] = React.useState("");
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [editing, setEditing] = React.useState<Driver | null>(null);

@@ -271,11 +271,11 @@ export async function replaceTyre(input: ReplaceInput): Promise<ActionResult> {
         },
       });
 
-      // 2. Mark the old tyre removed
+      // 2. Mark the old tyre scrapped (INSTALLED → SCRAPPED per business rule)
       await tx.tyre.update({
         where: { id: current.tyreId },
         data: {
-          status: "REMOVED",
+          status: "SCRAPPED",
           currentVehicleId: null,
           currentPositionId: null,
           currentInstallationId: null,
@@ -431,7 +431,7 @@ export async function removeTyre(input: RemoveInput): Promise<ActionResult> {
       await tx.tyre.update({
         where: { id: current.tyreId },
         data: {
-          status: "REMOVED",
+          status: "SCRAPPED",
           currentVehicleId: null,
           currentPositionId: null,
           currentInstallationId: null,

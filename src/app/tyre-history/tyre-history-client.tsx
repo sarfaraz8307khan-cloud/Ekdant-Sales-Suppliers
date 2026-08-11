@@ -96,7 +96,11 @@ export function TyreHistoryClient({
   drivers: Driver[];
   initialTyreId?: string | null;
 }) {
-  const [tyres] = React.useState(initialTyres);
+  const [tyres, setTyres] = React.useState(initialTyres);
+  // Keep client state in sync after server mutations + router.refresh()
+  React.useEffect(() => {
+    setTyres(initialTyres);
+  }, [initialTyres]);
   const [search, setSearch] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState<TyreStatus | "ALL">("ALL");
   const [modelFilter, setModelFilter] = React.useState<string>("ALL");

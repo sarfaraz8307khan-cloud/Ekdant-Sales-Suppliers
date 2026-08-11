@@ -29,7 +29,11 @@ const emptyPos: PositionFormData = { vehicleTypeId: "", axleId: "", positionId: 
 export function VehicleConfigurationsClient({ initialTypes }: { initialTypes: VehicleType[] }) {
   const router = useRouter();
   const { toast } = useToast();
-  const [types] = React.useState(initialTypes);
+  const [types, setTypes] = React.useState(initialTypes);
+  // Keep client state in sync after server mutations + router.refresh()
+  React.useEffect(() => {
+    setTypes(initialTypes);
+  }, [initialTypes]);
   const [search, setSearch] = React.useState("");
   const [expanded, setExpanded] = React.useState<string | null>(null);
 
