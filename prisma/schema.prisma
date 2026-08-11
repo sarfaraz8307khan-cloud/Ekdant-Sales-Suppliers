@@ -1,0 +1,362 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum TyreStatus {
+  AVAILABLE
+  RESERVED
+  INSTALLED
+  REMOVED
+  WORN_OUT
+  DAMAGED
+  SCRAPPED
+}
+
+enum EntityStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+enum Side {
+  LEFT
+  RIGHT
+  CENTER
+}
+
+enum PositionType {
+  STEERING
+  DRIVE
+  TRAILER
+  LIFT
+  OTHER
+}
+
+enum LifecycleEventType {
+  PURCHASED
+  INSTALLED
+  REMOVED
+  REPLACED
+  STATUS_CHANGED
+  RESERVED
+  UNRESERVED
+}
+
+model ApplicationSettings {
+  id            String   @id @default(cuid())
+  businessName  String   @default("Ekdant Sales & Suppliers")
+  logoPath      String?
+  currency      String   @default("INR")
+  dateFormat    String   @default("dd MMM yyyy")
+  tyreIdPrefix  String   @default("TYR")
+  tyreIdNextSeq Int      @default(1)
+  updatedAt     DateTime @updatedAt
+}
+
+model VehicleType {
+  id          String        @id @default(cuid())
+  name        String
+  description String?
+  axleCount   Int
+  tyreCount   Int
+  status      EntityStatus  @default(ACTIVE)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  axles       Axle[]
+  vehicles    Vehicle[]
+  models      TyreModelVehicleType[]
+  tyrePositions TyrePosition[]
+
+  @@unique([name])
+}
+
+model Axle {
+  id            String        @id @default(cuid())
+  vehicleTypeId String
+  axleNumber    Int
+  name          String
+  sequence      Int
+  status        EntityStatus  @default(ACTIVE)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  vehicleType   VehicleType   @relation(fields: [vehicleTypeId], references: [id], onDelete: Cascade)
+  positions     TyrePosition[]
+
+  @@unique([vehicleTypeId, axleNumber])
+  @@index([vehicleTypeId])
+}
+
+model TyrePosition {
+  id            String        @id @default(cuid())
+  vehicleTypeId String
+  axleId        String
+  positionId    String
+  displayName   String
+  shortCode     String
+  side          Side
+  sequence      Int
+  positionType  PositionType  @default(OTHER)
+  status        EntityStatus  @default(ACTIVE)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  axle          Axle          @relation(fields: [axleId], references: [id], onDelete: Cascade)
+  vehicleType   VehicleType   @relation(fields: [vehicleTypeId], references: [id], onDelete: Cascade)
+  installations Installation[]
+  currentTyres  Tyre[]        @relation("TyreCurrentPosition")
+
+  @@unique([vehicleTypeId, positionId])
+  @@index([vehicleTypeId])
+  @@index([axleId])
+}
+
+model Vehicle {
+  id             String        @id @default(cuid())
+  registrationNo String        @unique
+  vehicleTypeId  String
+  currentOdometer Int          @default(0)
+  driverId       String?
+  status         EntityStatus  @default(ACTIVE)
+  notes          String?
+  photoPath      String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  vehicleType    VehicleType   @relation(fields: [vehicleTypeId], references: [id])
+  driver         Driver?       @relation(fields: [driverId], references: [id])
+  installations  Installation[]
+  odometerReadings OdometerReading[]
+  activityLogs   ActivityLog[]
+  currentTyres   Tyre[]        @relation("TyreCurrentVehicle")
+
+  @@index([vehicleTypeId])
+  @@index([driverId])
+  @@index([status])
+}
+
+model Driver {
+  id          String        @id @default(cuid())
+  name        String
+  phone       String?
+  licenceNo   String?
+  address     String?
+  notes       String?
+  status      EntityStatus  @default(ACTIVE)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  vehicles    Vehicle[]
+  installations Installation[]
+
+  @@index([status])
+}
+
+model Vendor {
+  id            String        @id @default(cuid())
+  name          String
+  contactPerson String?
+  phone         String?
+  email         String?
+  address       String?
+  gstNumber     String?
+  notes         String?
+  status        EntityStatus  @default(ACTIVE)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  purchases     Purchase[]
+  tyres         Tyre[]
+
+  @@index([status])
+}
+
+model TyreModel {
+  id            String        @id @default(cuid())
+  brand         String
+  name          String
+  size          String
+  description   String?
+  minStockLevel Int           @default(2)
+  status        EntityStatus  @default(ACTIVE)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  compatibleVehicleTypes TyreModelVehicleType[]
+  tyres         Tyre[]
+  purchaseItems PurchaseItem[]
+
+  @@unique([brand, name, size])
+  @@index([status])
+}
+
+model TyreModelVehicleType {
+  tyreModelId   String
+  vehicleTypeId String
+  tyreModel     TyreModel   @relation(fields: [tyreModelId], references: [id], onDelete: Cascade)
+  vehicleType   VehicleType @relation(fields: [vehicleTypeId], references: [id], onDelete: Cascade)
+
+  @@id([tyreModelId, vehicleTypeId])
+}
+
+model Purchase {
+  id            String        @id @default(cuid())
+  billNumber    String
+  vendorId      String
+  purchaseDate  DateTime
+  tax           Decimal       @default(0)
+  discount      Decimal       @default(0)
+  finalAmount   Decimal
+  billPhotoPath String?
+  notes         String?
+  status        EntityStatus  @default(ACTIVE)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  vendor        Vendor        @relation(fields: [vendorId], references: [id])
+  items         PurchaseItem[]
+  tyres         Tyre[]
+  activityLogs  ActivityLog[]
+
+  @@unique([billNumber, vendorId])
+  @@index([vendorId])
+  @@index([purchaseDate])
+}
+
+model PurchaseItem {
+  id          String   @id @default(cuid())
+  purchaseId  String
+  tyreModelId String
+  quantity    Int
+  unitPrice   Decimal
+  tax         Decimal  @default(0)
+  discount    Decimal  @default(0)
+  subtotal    Decimal
+  total       Decimal
+  purchase    Purchase @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  tyreModel   TyreModel @relation(fields: [tyreModelId], references: [id])
+  tyres       Tyre[]
+
+  @@index([purchaseId])
+  @@index([tyreModelId])
+}
+
+model Tyre {
+  id             String        @id @default(cuid())
+  internalId     String        @unique
+  serialNo       String?
+  tyreModelId    String
+  purchaseItemId String?
+  purchaseId     String?
+  vendorId       String?
+  purchaseDate   DateTime?
+  unitPrice      Decimal?
+  status         TyreStatus    @default(AVAILABLE)
+  currentVehicleId String?
+  currentPositionId String?
+  currentInstallationId String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  tyreModel      TyreModel     @relation(fields: [tyreModelId], references: [id])
+  purchaseItem   PurchaseItem? @relation(fields: [purchaseItemId], references: [id])
+  purchase       Purchase?     @relation(fields: [purchaseId], references: [id])
+  vendor         Vendor?       @relation(fields: [vendorId], references: [id])
+  currentVehicle Vehicle?      @relation("TyreCurrentVehicle", fields: [currentVehicleId], references: [id])
+  currentPosition TyrePosition? @relation("TyreCurrentPosition", fields: [currentPositionId], references: [id])
+  installations  Installation[]
+  lifecycleEvents TyreLifecycleEvent[]
+  activityLogs   ActivityLog[]
+
+  @@index([status])
+  @@index([tyreModelId])
+  @@index([currentVehicleId])
+  @@index([currentPositionId])
+}
+
+model Installation {
+  id            String        @id @default(cuid())
+  tyreId        String
+  vehicleId     String
+  positionId    String
+  driverId      String?
+  installedAt   DateTime
+  odometer      Int
+  notes         String?
+  photoPath     String?
+  isCurrent     Boolean       @default(true)
+  removedAt     DateTime?
+  removalOdometer Int?
+  removalReasonId String?
+  removalNotes  String?
+  removalPhotoPath String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  tyre          Tyre          @relation(fields: [tyreId], references: [id])
+  vehicle       Vehicle       @relation(fields: [vehicleId], references: [id])
+  position      TyrePosition  @relation(fields: [positionId], references: [id])
+  driver        Driver?       @relation(fields: [driverId], references: [id])
+  removalReason RemovalReason? @relation(fields: [removalReasonId], references: [id])
+  lifecycleEvents TyreLifecycleEvent[]
+
+  @@index([tyreId])
+  @@index([vehicleId])
+  @@index([positionId])
+  @@index([isCurrent])
+}
+
+model RemovalReason {
+  id          String        @id @default(cuid())
+  name        String        @unique
+  description String?
+  status      EntityStatus  @default(ACTIVE)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  installations Installation[]
+}
+
+model TyreLifecycleEvent {
+  id          String            @id @default(cuid())
+  tyreId      String
+  type        LifecycleEventType
+  description String
+  occurredAt  DateTime          @default(now())
+  metadata    String?
+  installationId String?
+  tyre        Tyre              @relation(fields: [tyreId], references: [id], onDelete: Cascade)
+  installation Installation?    @relation(fields: [installationId], references: [id])
+
+  @@index([tyreId])
+  @@index([occurredAt])
+}
+
+model OdometerReading {
+  id        String   @id @default(cuid())
+  vehicleId String
+  reading   Int
+  recordedAt DateTime @default(now())
+  isOverride Boolean @default(false)
+  notes     String?
+  vehicle   Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  @@index([vehicleId])
+  @@index([recordedAt])
+}
+
+model ActivityLog {
+  id          String   @id @default(cuid())
+  action      String
+  entityType  String
+  entityId    String?
+  description String
+  previousValue String?
+  newValue    String?
+  createdAt   DateTime @default(now())
+  tyreId      String?
+  vehicleId   String?
+  purchaseId  String?
+  tyre        Tyre?    @relation(fields: [tyreId], references: [id])
+  vehicle     Vehicle? @relation(fields: [vehicleId], references: [id])
+  purchase    Purchase? @relation(fields: [purchaseId], references: [id])
+
+  @@index([entityType])
+  @@index([entityId])
+  @@index([createdAt])
+}

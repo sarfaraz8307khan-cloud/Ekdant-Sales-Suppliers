@@ -1,69 +1,125 @@
-import Image from "next/image";
+import { db } from "@/lib/db";
+import { DashboardClient } from "./dashboard-client";
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+export default async function DashboardPage() {
+  const [
+    vehicleCount,
+    activeVehicleCount,
+    tyreCounts,
+    purchaseCount,
+    tyreExpenditure,
+    lowStockModels,
+    recentActivity,
+    incompleteVehicles,
+  ] = await Promise.all([
+    db.vehicle.count(),
+    db.vehicle.count({ where: { status: "ACTIVE" } }),
+    db.tyre.groupBy({
+      by: ["status"],
+      _count: { _all: true },
+    }),
+    db.purchase.count(),
+    db.purchase.aggregate({
+      _sum: { finalAmount: true },
+    }),
+    db.tyreModel.findMany({
+      where: { status: "ACTIVE" },
+      include: {
+        _count: {
+          select: {
+            tyres: {
+              where: { status: "AVAILABLE" },
+            },
+          },
+        },
+      },
+      orderBy: { name: "asc" },
+    }),
+    db.activityLog.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 10,
+      include: {
+        tyre: { select: { id: true, internalId: true } },
+        vehicle: { select: { id: true, registrationNo: true } },
+        purchase: { select: { id: true, billNumber: true } },
+      },
+    }),
+    db.vehicle.findMany({
+      where: { status: "ACTIVE" },
+      select: {
+        id: true,
+        registrationNo: true,
+        vehicleType: {
+          select: {
+            id: true,
+            name: true,
+            tyreCount: true,
+            tyrePositions: {
+              where: { status: "ACTIVE" },
+              select: { id: true },
+            },
+          },
+        },
+        currentTyres: {
+          where: { status: "INSTALLED" },
+          select: { id: true },
+        },
+      },
+    }),
+  ]);
+
+  const countByStatus = (status: string) =>
+    tyreCounts.find((t) => t.status === status)?._count._all ?? 0;
+
+  const lowStock = lowStockModels
+    .filter((m) => m._count.tyres < m.minStockLevel)
+    .map((m) => ({
+      id: m.id,
+      brand: m.brand,
+      name: m.name,
+      size: m.size,
+      minStockLevel: m.minStockLevel,
+      available: m._count.tyres,
+    }));
+
+  const incomplete = incompleteVehicles
+    .filter(
+      (v) =>
+        v.currentTyres.length < v.vehicleType.tyrePositions.length ||
+        v.vehicleType.tyrePositions.length === 0
+    )
+    .map((v) => ({
+      id: v.id,
+      registrationNo: v.registrationNo,
+      vehicleTypeName: v.vehicleType.name,
+      installed: v.currentTyres.length,
+      expected: v.vehicleType.tyrePositions.length,
+    }));
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+    <DashboardClient
+      kpis={{
+        totalVehicles: vehicleCount,
+        activeVehicles: activeVehicleCount,
+        availableTyres: countByStatus("AVAILABLE"),
+        installedTyres: countByStatus("INSTALLED"),
+        removedTyres: countByStatus("REMOVED"),
+        totalPurchases: purchaseCount,
+        tyreExpenditure: tyreExpenditure._sum.finalAmount?.toString() ?? "0",
+      }}
+      lowStock={lowStock}
+      incompleteVehicles={incomplete}
+      recentActivity={recentActivity.map((a) => ({
+        id: a.id,
+        action: a.action,
+        description: a.description,
+        createdAt: a.createdAt.toISOString(),
+        tyreInternalId: a.tyre?.internalId ?? null,
+        vehicleRegistrationNo: a.vehicle?.registrationNo ?? null,
+        purchaseBillNumber: a.purchase?.billNumber ?? null,
+      }))}
+    />
   );
 }
