@@ -8,6 +8,7 @@ export default async function DashboardPage() {
     vehicleCount,
     activeVehicleCount,
     tyreCounts,
+    installedFromInventory,
     purchaseCount,
     tyreExpenditure,
     lowStockModels,
@@ -20,6 +21,16 @@ export default async function DashboardPage() {
     db.tyre.groupBy({
       by: ["status"],
       _count: { _all: true },
+    }),
+    // "Installed" on the dashboard means tyres that were changed from
+    // purchased inventory (replacement tyres). Company-fitted factory tyres
+    // arrive with the vehicle (no purchase link) and never interact with
+    // inventory, so they are excluded here.
+    db.tyre.count({
+      where: {
+        status: "INSTALLED",
+        purchaseId: { not: null },
+      },
     }),
     db.purchase.count(),
     db.purchase.aggregate({
@@ -35,7 +46,12 @@ export default async function DashboardPage() {
             },
           },
         },
-        tyres: { select: { id: true } },
+        // Only purchased (inventory) tyres count towards low-stock alerts —
+        // factory-fitted tyres are not stock and should not trigger them.
+        tyres: {
+          where: { purchaseId: { not: null } },
+          select: { id: true },
+        },
       },
       orderBy: { name: "asc" },
     }),
@@ -47,7 +63,13 @@ export default async function DashboardPage() {
         name: true,
         size: true,
         minStockLevel: true,
-        tyres: { select: { status: true } },
+        // Dashboard "Tyres by Model" reflects INVENTORY only — factory-fitted
+        // tyres (no purchase link) are excluded entirely, so a brand-new fleet
+        // with no stock shows 0/0 rather than phantom totals.
+        tyres: {
+          where: { purchaseId: { not: null } },
+          select: { status: true, purchaseId: true },
+        },
       },
       orderBy: { name: "asc" },
     }),
@@ -144,14 +166,14 @@ export default async function DashboardPage() {
         totalVehicles: vehicleCount,
         activeVehicles: activeVehicleCount,
         availableTyres: countByStatus("AVAILABLE"),
-        installedTyres: countByStatus("INSTALLED"),
+        installedTyres: installedFromInventory,
         removedTyres: countByStatus("REMOVED"),
         totalPurchases: purchaseCount,
         tyreExpenditure: tyreExpenditure._sum.finalAmount?.toString() ?? "0",
       }}
       tyreStatus={{
         available: countByStatus("AVAILABLE"),
-        installed: countByStatus("INSTALLED"),
+        installed: installedFromInventory,
         removed: countByStatus("REMOVED"),
         reserved: countByStatus("RESERVED"),
         damaged: countByStatus("DAMAGED") + countByStatus("WORN_OUT") + countByStatus("SCRAPPED"),

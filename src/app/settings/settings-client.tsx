@@ -1,12 +1,14 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/ui/page";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Dialog } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/toast";
 import { Icon } from "@/components/ui/icon";
-import { updateCompanyProfile, updateTheme } from "./actions";
+import { updateCompanyProfile, updateTheme, resetApplicationData } from "./actions";
 import { changePassword } from "@/app/(auth)/actions";
 
 type Settings = {
@@ -39,6 +41,38 @@ export function SettingsClient({ settings }: { settings: Settings }) {
   const [showPassword, setShowPassword] = React.useState(false);
   const [pwdSaving, setPwdSaving] = React.useState(false);
   const [pwdError, setPwdError] = React.useState<string | null>(null);
+
+  // Reset application data state
+  const router = useRouter();
+  const [resetOpen, setResetOpen] = React.useState(false);
+  const [resetPassword, setResetPassword] = React.useState("");
+  const [resetConfirm, setResetConfirm] = React.useState(false);
+  const [resetPending, setResetPending] = React.useState(false);
+  const [resetError, setResetError] = React.useState<string | null>(null);
+
+  const closeReset = () => {
+    setResetOpen(false);
+    setResetPassword("");
+    setResetConfirm(false);
+    setResetError(null);
+  };
+
+  const handleReset = async () => {
+    setResetPending(true);
+    setResetError(null);
+    const result = await resetApplicationData(resetPassword);
+    setResetPending(false);
+    if (result.ok) {
+      toast(
+        "success",
+        `Application data reset — ${result.stats.recordsDeleted.toLocaleString("en-IN")} record(s) cleared, ${result.stats.tyresAllocated} factory tyres re-allocated`
+      );
+      closeReset();
+      router.refresh();
+    } else {
+      setResetError(result.error);
+    }
+  };
 
   const handleLogo = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -300,6 +334,91 @@ export function SettingsClient({ settings }: { settings: Settings }) {
           </Button>
         </form>
       </div>
+
+      {/* Reset application data (danger zone) */}
+      <div className="bg-surface rounded-xl border border-danger/30 shadow-sm p-4 sm:p-6 mt-4">
+        <h2 className="font-semibold text-foreground mb-1 flex items-center gap-2">
+          <Icon name="alert-triangle" size={16} className="text-danger" />
+          Reset Application Data
+        </h2>
+        <p className="text-sm text-muted mb-4">
+          Deletes all purchases, tyre replacements, inventory, drivers, vendors, expenditure and
+          activity. Vehicles, tyre models, vehicle types and your account are kept — the app starts
+          fresh with factory-fitted tyres. This cannot be undone.
+        </p>
+        <Button variant="danger" onClick={() => setResetOpen(true)}>
+          <Icon name="trash-2" size={16} />
+          Reset data
+        </Button>
+      </div>
+
+      {/* Reset confirmation dialog */}
+      <Dialog
+        open={resetOpen}
+        onClose={closeReset}
+        title="Reset Application Data"
+        description="This permanently deletes all purchases, replacements, inventory, drivers, vendors and activity."
+      >
+        <div className="space-y-4">
+          <div className="rounded-lg bg-danger-soft border border-danger/20 px-3 py-2.5 text-sm text-danger flex items-start gap-2">
+            <Icon name="alert-triangle" size={16} className="mt-0.5 shrink-0" />
+            <span>
+              Vehicles, tyre models and configuration are kept. This action cannot be undone.
+            </span>
+          </div>
+
+          {resetError && (
+            <div
+              className="rounded-lg bg-danger-soft border border-danger/20 px-3 py-2 text-sm text-danger"
+              role="alert"
+            >
+              {resetError}
+            </div>
+          )}
+
+          <div>
+            <label htmlFor="resetPassword" className="block text-sm font-medium text-foreground mb-1.5">
+              Admin password
+            </label>
+            <input
+              id="resetPassword"
+              type="password"
+              required
+              value={resetPassword}
+              onChange={(e) => setResetPassword(e.target.value)}
+              className="w-full h-10 rounded-lg border border-border bg-background px-3 text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+              placeholder="Enter your password to confirm"
+            />
+          </div>
+
+          <label className="flex items-start gap-2.5 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={resetConfirm}
+              onChange={(e) => setResetConfirm(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-border accent-danger"
+            />
+            <span className="text-sm text-foreground">
+              I understand this deletes all business records and cannot be undone.
+            </span>
+          </label>
+
+          <div className="flex gap-3">
+            <Button variant="outline" className="flex-1" onClick={closeReset}>
+              Cancel
+            </Button>
+            <Button
+              variant="danger"
+              className="flex-1"
+              loading={resetPending}
+              disabled={!resetPassword || !resetConfirm}
+              onClick={handleReset}
+            >
+              Reset All Data
+            </Button>
+          </div>
+        </div>
+      </Dialog>
     </div>
   );
 }

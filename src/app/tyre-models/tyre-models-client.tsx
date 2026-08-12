@@ -366,7 +366,7 @@ export function TyreModelsClient({
         title="Delete tyre model?"
         message={
           deleteTarget
-            ? `Delete "${deleteTarget.brand} ${deleteTarget.name} ${deleteTarget.size}"? This action cannot be undone. Models linked to tyres or purchases cannot be deleted and should be deactivated instead.`
+            ? `Delete "${deleteTarget.brand} ${deleteTarget.name} ${deleteTarget.size}"? This also deletes its tyres, replacements, purchase history and inventory adjustments. This action cannot be undone.`
             : "Delete this tyre model?"
         }
         confirmLabel="Delete"

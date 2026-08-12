@@ -1,5 +1,6 @@
 "use server";
 
+import { startOfDay } from "date-fns";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { logActivity } from "@/lib/audit";
@@ -92,7 +93,10 @@ export async function replaceTyre(input: ReplaceTyreInput): Promise<ActionResult
       if (!current) {
         throw new ServiceError("positionId", "There is no current tyre installed at this location. Replacement requires an existing tyre.");
       }
-      if (removalDate < current.installedAt) {
+      // The replacement date is entered as a calendar day; a tyre installed
+      // earlier the same day must still be replaceable today. Compare the
+      // calendar dates, not the instants.
+      if (startOfDay(removalDate) < startOfDay(current.installedAt)) {
         throw new ServiceError("removedAt", "Replacement date cannot be before the current tyre was installed.");
       }
 

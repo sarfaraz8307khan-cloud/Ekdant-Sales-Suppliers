@@ -118,29 +118,43 @@ export async function deleteTyreModel(id: string) {
   try {
     const model = await db.tyreModel.findUnique({
       where: { id },
-      include: {
-        tyres: { select: { id: true } },
-        purchaseItems: { select: { id: true } },
-        inventoryAdjustments: { select: { id: true } },
-      },
+      select: { id: true, brand: true, name: true, size: true },
     });
     if (!model) return { ok: false, errors: { _form: "Tyre model not found." } };
 
-    if (
-      model.tyres.length > 0 ||
-      model.purchaseItems.length > 0 ||
-      model.inventoryAdjustments.length > 0
-    ) {
-      return {
-        ok: false,
-        errors: {
-          _form:
-            "This tyre model is linked to tyres, purchase items or inventory adjustments and cannot be permanently deleted. Deactivate it instead.",
-        },
-      };
-    }
+    // Deleting a model also removes its tyres (with their install/history),
+    // inventory adjustments and purchase line items, so the system allows
+    // removal even after a model has been used. Purchases that end up with
+    // no line items are cleaned up too.
+    const tyreIds = (
+      await db.tyre.findMany({ where: { tyreModelId: id }, select: { id: true } })
+    ).map((t) => t.id);
+    const purchaseItemIds = (
+      await db.purchaseItem.findMany({ where: { tyreModelId: id }, select: { id: true } })
+    ).map((i) => i.id);
 
-    await db.tyreModel.delete({ where: { id } });
+    await db.$transaction([
+      db.tyreLifecycleEvent.deleteMany({ where: { tyreId: { in: tyreIds } } }),
+      db.installation.deleteMany({ where: { tyreId: { in: tyreIds } } }),
+      db.activityLog.deleteMany({ where: { tyreId: { in: tyreIds } } }),
+      db.tyre.deleteMany({ where: { id: { in: tyreIds } } }),
+      db.inventoryAdjustment.deleteMany({ where: { tyreModelId: id } }),
+      db.purchaseItem.deleteMany({ where: { id: { in: purchaseItemIds } } }),
+      db.tyreModelVehicleType.deleteMany({ where: { tyreModelId: id } }),
+      db.tyreModel.delete({ where: { id } }),
+    ]);
+
+    // Remove purchases that no longer have any line items.
+    const empty = await db.purchase.findMany({
+      where: { items: { none: {} } },
+      select: { id: true },
+    });
+    if (empty.length > 0) {
+      await db.$transaction([
+        db.activityLog.deleteMany({ where: { purchaseId: { in: empty.map((p) => p.id) } } }),
+        db.purchase.deleteMany({ where: { id: { in: empty.map((p) => p.id) } } }),
+      ]);
+    }
 
     await logActivity({
       action: "DELETE",
@@ -152,6 +166,7 @@ export async function deleteTyreModel(id: string) {
 
     revalidatePath("/tyre-models");
     revalidatePath("/inventory");
+    revalidatePath("/");
     return { ok: true };
   } catch (error) {
     console.error("deleteTyreModel failed:", error);

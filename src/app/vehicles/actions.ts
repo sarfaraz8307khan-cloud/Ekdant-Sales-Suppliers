@@ -131,33 +131,34 @@ export async function deleteVehicle(id: string) {
   try {
     const vehicle = await db.vehicle.findUnique({
       where: { id },
-      include: {
-        installations: { select: { id: true } },
+      select: {
+        id: true,
+        registrationNo: true,
         currentTyres: { select: { id: true } },
-        odometerReadings: { select: { id: true } },
-        activityLogs: { select: { id: true } },
-        expenditures: { select: { id: true } },
+        installations: { select: { tyreId: true } },
       },
     });
     if (!vehicle) return { ok: false, errors: { _form: "Vehicle not found." } };
 
-    if (
-      vehicle.installations.length > 0 ||
-      vehicle.currentTyres.length > 0 ||
-      vehicle.odometerReadings.length > 0 ||
-      vehicle.activityLogs.length > 0 ||
-      vehicle.expenditures.length > 0
-    ) {
-      return {
-        ok: false,
-        errors: {
-          _form:
-            "This vehicle is linked to historical tyre, expense or activity records and cannot be permanently deleted. Deactivate it instead.",
-        },
-      };
-    }
+    // Deleting a vehicle removes its tyres (factory-fitted and replacement),
+    // installation history, odometer readings, activity and expenditure.
+    // Kept history from other vehicles is untouched.
+    const tyreIds = Array.from(
+      new Set([
+        ...vehicle.currentTyres.map((t) => t.id),
+        ...vehicle.installations.map((i) => i.tyreId),
+      ])
+    );
 
-    await db.vehicle.delete({ where: { id } });
+    await db.$transaction([
+      db.tyreLifecycleEvent.deleteMany({ where: { tyreId: { in: tyreIds } } }),
+      db.installation.deleteMany({ where: { vehicleId: vehicle.id } }),
+      db.tyre.deleteMany({ where: { id: { in: tyreIds } } }),
+      db.odometerReading.deleteMany({ where: { vehicleId: vehicle.id } }),
+      db.activityLog.deleteMany({ where: { vehicleId: vehicle.id } }),
+      db.expenditure.deleteMany({ where: { vehicleId: vehicle.id } }),
+      db.vehicle.delete({ where: { id: vehicle.id } }),
+    ]);
 
     await logActivity({
       action: "DELETE",
@@ -168,6 +169,8 @@ export async function deleteVehicle(id: string) {
     });
 
     revalidatePath("/vehicles");
+    revalidatePath("/");
+    revalidatePath("/reports");
     return { ok: true };
   } catch (error) {
     console.error("deleteVehicle failed:", error);
