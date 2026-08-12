@@ -12,7 +12,7 @@ import { StatusBadge } from "@/components/ui/badge";
 import { Icon } from "@/components/ui/icon";
 import { EmptyState } from "@/components/ui/states";
 import { useToast } from "@/components/ui/toast";
-import { createTyreModel, updateTyreModel, setTyreModelStatus, type TyreModelFormData } from "./actions";
+import { createTyreModel, updateTyreModel, setTyreModelStatus, deleteTyreModel, type TyreModelFormData } from "./actions";
 
 type VehicleType = { id: string; name: string };
 type TyreModel = {
@@ -45,11 +45,7 @@ export function TyreModelsClient({
 }) {
   const router = useRouter();
   const { toast } = useToast();
-  const [models, setModels] = React.useState(initialModels);
-  // Keep client state in sync after server mutations + router.refresh()
-  React.useEffect(() => {
-    setModels(initialModels);
-  }, [initialModels]);
+  const models = initialModels;
   const [search, setSearch] = React.useState("");
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [editing, setEditing] = React.useState<TyreModel | null>(null);
@@ -58,6 +54,8 @@ export function TyreModelsClient({
   const [saving, setSaving] = React.useState(false);
   const [statusTarget, setStatusTarget] = React.useState<TyreModel | null>(null);
   const [statusLoading, setStatusLoading] = React.useState(false);
+  const [deleteTarget, setDeleteTarget] = React.useState<TyreModel | null>(null);
+  const [deleteLoading, setDeleteLoading] = React.useState(false);
 
   const filtered = React.useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -133,6 +131,21 @@ export function TyreModelsClient({
     }
   };
 
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleteLoading(true);
+    const result = await deleteTyreModel(deleteTarget.id);
+    setDeleteLoading(false);
+    if (result.ok) {
+      toast("success", "Tyre model deleted successfully");
+      setDeleteTarget(null);
+      router.refresh();
+    } else {
+      toast("error", result.errors?._form ?? "Unable to delete this tyre model.");
+      setDeleteTarget(null);
+    }
+  };
+
   return (
     <div>
       <PageHeader
@@ -167,7 +180,7 @@ export function TyreModelsClient({
           {filtered.map((m) => {
             const lowStock = m._count.tyres < m.minStockLevel;
             return (
-              <div key={m.id} className="bg-white rounded-xl border border-border shadow-sm p-4">
+              <div key={m.id} className="bg-surface rounded-xl border border-border shadow-sm p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
@@ -186,17 +199,24 @@ export function TyreModelsClient({
                     >
                       <Icon name="pencil" size={16} />
                     </button>
-                    <button
-                      onClick={() => setStatusTarget(m)}
-                      className="p-2 rounded-lg hover:bg-muted-soft transition-colors"
-                      aria-label={m.status === "ACTIVE" ? `Deactivate ${m.brand} ${m.name}` : `Activate ${m.brand} ${m.name}`}
-                    >
-                      <Icon
-                        name={m.status === "ACTIVE" ? "power" : "power-off"}
-                        size={16}
-                        className={m.status === "ACTIVE" ? "text-danger" : "text-muted"}
-                      />
-                    </button>
+                  <button
+                    onClick={() => setStatusTarget(m)}
+                    className="p-2 rounded-lg hover:bg-muted-soft transition-colors"
+                    aria-label={m.status === "ACTIVE" ? `Deactivate ${m.brand} ${m.name}` : `Activate ${m.brand} ${m.name}`}
+                  >
+                    <Icon
+                      name={m.status === "ACTIVE" ? "power" : "refresh"}
+                      size={16}
+                      className={m.status === "ACTIVE" ? "text-danger" : "text-muted"}
+                    />
+                  </button>
+                  <button
+                    onClick={() => setDeleteTarget(m)}
+                    className="p-2 rounded-lg hover:bg-danger-soft hover:text-danger text-muted transition-colors"
+                    aria-label={`Delete ${m.brand} ${m.name}`}
+                  >
+                    <Icon name="trash-2" size={16} />
+                  </button>
                   </div>
                 </div>
 
@@ -331,12 +351,27 @@ export function TyreModelsClient({
         title={statusTarget?.status === "ACTIVE" ? "Deactivate tyre model?" : "Activate tyre model?"}
         message={
           statusTarget?.status === "ACTIVE"
-            ? `"${statusTarget?.brand} ${statusTarget?.name}" will be deactivated. Existing tyres will remain intact.`
-            : `"${statusTarget?.brand} ${statusTarget?.name}" will be reactivated.`
+            ? `"${statusTarget?.brand} ${statusTarget?.name} ${statusTarget?.size}" will be deactivated. Historical records will remain intact.`
+            : `"${statusTarget?.brand} ${statusTarget?.name} ${statusTarget?.size}" will be reactivated.`
         }
         confirmLabel={statusTarget?.status === "ACTIVE" ? "Deactivate" : "Activate"}
         danger={statusTarget?.status === "ACTIVE"}
         loading={statusLoading}
+      />
+
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleDelete}
+        title="Delete tyre model?"
+        message={
+          deleteTarget
+            ? `Delete "${deleteTarget.brand} ${deleteTarget.name} ${deleteTarget.size}"? This action cannot be undone. Models linked to tyres or purchases cannot be deleted and should be deactivated instead.`
+            : "Delete this tyre model?"
+        }
+        confirmLabel="Delete"
+        danger
+        loading={deleteLoading}
       />
     </div>
   );

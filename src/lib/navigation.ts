@@ -1,8 +1,10 @@
 export const primaryNav = [
   { label: "Dashboard", href: "/", icon: "layout-dashboard" },
   { label: "Vehicles", href: "/vehicles", icon: "truck" },
+  { label: "Replace Tyre", href: "/replace-tyre", icon: "wrench" },
   { label: "Inventory", href: "/inventory", icon: "package" },
   { label: "Purchases", href: "/purchases", icon: "shopping-cart" },
+  { label: "Expenditure", href: "/expenditure", icon: "indian-rupee" },
 ] as const;
 
 export const secondaryNav = [
@@ -15,4 +17,9 @@ export const secondaryNav = [
   { label: "Settings", href: "/settings", icon: "settings" },
 ] as const;
 
-export const mobileBottomNav = primaryNav;
+export const mobileBottomNav = [
+  { label: "Home", href: "/", icon: "layout-dashboard" },
+  { label: "Replace", href: "/replace-tyre", icon: "wrench" },
+  { label: "Vehicles", href: "/vehicles", icon: "truck" },
+  { label: "Inventory", href: "/inventory", icon: "package" },
+] as const;

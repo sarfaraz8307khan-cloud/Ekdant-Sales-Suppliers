@@ -114,6 +114,51 @@ export async function updateTyreModel(id: string, data: TyreModelFormData) {
   }
 }
 
+export async function deleteTyreModel(id: string) {
+  try {
+    const model = await db.tyreModel.findUnique({
+      where: { id },
+      include: {
+        tyres: { select: { id: true } },
+        purchaseItems: { select: { id: true } },
+        inventoryAdjustments: { select: { id: true } },
+      },
+    });
+    if (!model) return { ok: false, errors: { _form: "Tyre model not found." } };
+
+    if (
+      model.tyres.length > 0 ||
+      model.purchaseItems.length > 0 ||
+      model.inventoryAdjustments.length > 0
+    ) {
+      return {
+        ok: false,
+        errors: {
+          _form:
+            "This tyre model is linked to tyres, purchase items or inventory adjustments and cannot be permanently deleted. Deactivate it instead.",
+        },
+      };
+    }
+
+    await db.tyreModel.delete({ where: { id } });
+
+    await logActivity({
+      action: "DELETE",
+      entityType: "TyreModel",
+      entityId: id,
+      description: `Tyre model "${model.brand} ${model.name} ${model.size}" deleted`,
+      previousValue: `${model.brand} ${model.name} ${model.size}`,
+    });
+
+    revalidatePath("/tyre-models");
+    revalidatePath("/inventory");
+    return { ok: true };
+  } catch (error) {
+    console.error("deleteTyreModel failed:", error);
+    return { ok: false, errors: { _form: "Unable to delete this tyre model. Please try again." } };
+  }
+}
+
 export async function setTyreModelStatus(id: string, status: "ACTIVE" | "INACTIVE") {
   try {
     const model = await db.tyreModel.update({

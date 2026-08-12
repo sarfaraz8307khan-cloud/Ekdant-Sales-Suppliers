@@ -86,7 +86,7 @@ export function Pagination({
         <button
           onClick={() => onPageChange(page - 1)}
           disabled={page <= 1}
-          className="h-8 w-8 rounded-lg border border-border bg-white flex items-center justify-center hover:bg-muted-soft disabled:opacity-40 disabled:pointer-events-none transition-colors"
+          className="h-8 w-8 rounded-lg border border-border bg-surface flex items-center justify-center hover:bg-muted-soft disabled:opacity-40 disabled:pointer-events-none transition-colors"
           aria-label="Previous page"
         >
           <Icon name="chevron-left" size={16} />
@@ -97,7 +97,7 @@ export function Pagination({
         <button
           onClick={() => onPageChange(page + 1)}
           disabled={page >= totalPages}
-          className="h-8 w-8 rounded-lg border border-border bg-white flex items-center justify-center hover:bg-muted-soft disabled:opacity-40 disabled:pointer-events-none transition-colors"
+          className="h-8 w-8 rounded-lg border border-border bg-surface flex items-center justify-center hover:bg-muted-soft disabled:opacity-40 disabled:pointer-events-none transition-colors"
           aria-label="Next page"
         >
           <Icon name="chevron-right" size={16} />
@@ -125,18 +125,19 @@ export function StatCard({
     success: "bg-success-soft text-success",
     warning: "bg-warning-soft text-warning",
     danger: "bg-danger-soft text-danger",
-    primary: "bg-primary-soft text-primary",
+    primary:
+      "bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-sm shadow-indigo-500/30",
   };
 
   return (
-    <div className="bg-white rounded-xl border border-border shadow-sm p-4">
+    <div className="card-surface p-4 transition-shadow hover:shadow-md">
       <div className="flex items-center justify-between">
         <p className="text-xs font-medium text-muted">{label}</p>
         <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", tones[tone])}>
           <Icon name={icon} size={16} />
         </div>
       </div>
-      <p className="text-2xl font-bold text-foreground mt-2">{value}</p>
+      <p className="text-2xl font-bold text-foreground mt-2 tabular-nums">{value}</p>
       {sub && <p className="text-xs text-muted mt-1">{sub}</p>}
     </div>
   );

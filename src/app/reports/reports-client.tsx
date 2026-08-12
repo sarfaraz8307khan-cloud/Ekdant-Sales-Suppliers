@@ -179,7 +179,7 @@ export function ReportsClient({
 
   return (
     <div>
-      <PageHeader title="Reports" description="Real-time reports from your fleet data" />
+      <PageHeader title="Reports" description="Real-time reports from your fleet data" backHref="/" />
 
       {/* Date range filter */}
       <Card className="mb-4">
@@ -190,7 +190,7 @@ export function ReportsClient({
               type="date"
               value={fromDate}
               onChange={(e) => setFromDate(e.target.value)}
-              className="w-full h-10 px-3 rounded-lg border border-border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+              className="w-full h-10 px-3 rounded-lg border border-border bg-surface text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
             />
           </label>
           <label className="block flex-1">
@@ -199,7 +199,7 @@ export function ReportsClient({
               type="date"
               value={toDate}
               onChange={(e) => setToDate(e.target.value)}
-              className="w-full h-10 px-3 rounded-lg border border-border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+              className="w-full h-10 px-3 rounded-lg border border-border bg-surface text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
             />
           </label>
           {(fromDate || toDate) && (
@@ -225,7 +225,7 @@ export function ReportsClient({
             className={`shrink-0 h-9 px-3 rounded-full text-xs font-medium transition-colors flex items-center gap-1.5 ${
               tab === t.id
                 ? "bg-primary text-white"
-                : "bg-white border border-border text-muted hover:bg-muted-soft"
+                : "bg-surface border border-border text-muted hover:bg-muted-soft"
             }`}
           >
             <Icon name={t.icon} size={14} />
@@ -238,8 +238,6 @@ export function ReportsClient({
         <PurchaseReport
           purchases={purchases}
           inRange={inRange}
-          fromDate={fromDate}
-          toDate={toDate}
           sort={sort.purchase}
           onSortChange={setTabSort}
           businessName={businessName}
@@ -269,8 +267,6 @@ export function ReportsClient({
         <LifecycleReport
           tyres={tyres}
           inRange={inRange}
-          fromDate={fromDate}
-          toDate={toDate}
           sort={sort.lifecycle}
           onSortChange={setTabSort}
           businessName={businessName}
@@ -294,8 +290,6 @@ export function ReportsClient({
 function PurchaseReport({
   purchases,
   inRange,
-  fromDate,
-  toDate,
   sort,
   onSortChange,
   businessName,
@@ -304,8 +298,6 @@ function PurchaseReport({
 }: {
   purchases: Purchase[];
   inRange: (d: Date | string | null | undefined) => boolean;
-  fromDate: string;
-  toDate: string;
   sort: SortConfig;
   onSortChange: (s: SortConfig) => void;
   businessName: string;
@@ -629,8 +621,6 @@ function VehicleTyreReport({
 function LifecycleReport({
   tyres,
   inRange,
-  fromDate,
-  toDate,
   sort,
   onSortChange,
   businessName,
@@ -639,8 +629,6 @@ function LifecycleReport({
 }: {
   tyres: Tyre[];
   inRange: (d: Date | string | null | undefined) => boolean;
-  fromDate: string;
-  toDate: string;
   sort: SortConfig;
   onSortChange: (s: SortConfig) => void;
   businessName: string;
@@ -826,7 +814,7 @@ function ExpenseReport({
 
 function SummaryCard({ label, value, icon }: { label: string; value: string; icon: string }) {
   return (
-    <div className="bg-white rounded-xl border border-border shadow-sm p-4">
+    <div className="bg-surface rounded-xl border border-border shadow-sm p-4">
       <div className="flex items-center justify-between">
         <p className="text-xs font-medium text-muted">{label}</p>
         <div className="w-8 h-8 rounded-lg bg-primary-soft text-primary flex items-center justify-center">

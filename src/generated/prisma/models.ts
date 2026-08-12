@@ -8,6 +8,8 @@
  *
  * 🟢 You can import this file directly.
  */
+export type * from './models/User'
+export type * from './models/PasswordReset'
 export type * from './models/ApplicationSettings'
 export type * from './models/VehicleType'
 export type * from './models/Axle'
@@ -24,5 +26,7 @@ export type * from './models/Installation'
 export type * from './models/RemovalReason'
 export type * from './models/TyreLifecycleEvent'
 export type * from './models/OdometerReading'
+export type * from './models/Expenditure'
+export type * from './models/InventoryAdjustment'
 export type * from './models/ActivityLog'
 export type * from './commonInputTypes'

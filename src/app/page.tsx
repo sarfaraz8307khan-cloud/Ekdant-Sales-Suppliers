@@ -11,6 +11,7 @@ export default async function DashboardPage() {
     purchaseCount,
     tyreExpenditure,
     lowStockModels,
+    modelStock,
     recentActivity,
     incompleteVehicles,
   ] = await Promise.all([
@@ -34,6 +35,18 @@ export default async function DashboardPage() {
             },
           },
         },
+      },
+      orderBy: { name: "asc" },
+    }),
+    db.tyreModel.findMany({
+      where: { status: "ACTIVE" },
+      select: {
+        id: true,
+        brand: true,
+        name: true,
+        size: true,
+        minStockLevel: true,
+        tyres: { select: { status: true } },
       },
       orderBy: { name: "asc" },
     }),
@@ -84,6 +97,29 @@ export default async function DashboardPage() {
       available: m._count.tyres,
     }));
 
+  const tyresByModel = modelStock.map((m) => {
+    const byStatus = new Map<string, number>();
+    for (const t of m.tyres) {
+      byStatus.set(t.status, (byStatus.get(t.status) ?? 0) + 1);
+    }
+    return {
+      id: m.id,
+      brand: m.brand,
+      name: m.name,
+      size: m.size,
+      minStockLevel: m.minStockLevel,
+      available: byStatus.get("AVAILABLE") ?? 0,
+      installed: byStatus.get("INSTALLED") ?? 0,
+      removed: byStatus.get("REMOVED") ?? 0,
+      other:
+        (byStatus.get("WORN_OUT") ?? 0) +
+        (byStatus.get("DAMAGED") ?? 0) +
+        (byStatus.get("SCRAPPED") ?? 0) +
+        (byStatus.get("RESERVED") ?? 0),
+      total: m.tyres.length,
+    };
+  });
+
   const incomplete = incompleteVehicles
     .filter(
       (v) =>
@@ -109,6 +145,14 @@ export default async function DashboardPage() {
         totalPurchases: purchaseCount,
         tyreExpenditure: tyreExpenditure._sum.finalAmount?.toString() ?? "0",
       }}
+      tyreStatus={{
+        available: countByStatus("AVAILABLE"),
+        installed: countByStatus("INSTALLED"),
+        removed: countByStatus("REMOVED"),
+        reserved: countByStatus("RESERVED"),
+        damaged: countByStatus("DAMAGED") + countByStatus("WORN_OUT") + countByStatus("SCRAPPED"),
+      }}
+      tyresByModel={tyresByModel}
       lowStock={lowStock}
       incompleteVehicles={incomplete}
       recentActivity={recentActivity.map((a) => ({

@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/ui/page";
-import { Dialog } from "@/components/ui/dialog";
+import { Dialog, ConfirmDialog } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, Textarea, FormSection } from "@/components/ui/form";
@@ -12,7 +12,7 @@ import { Icon } from "@/components/ui/icon";
 import { EmptyState } from "@/components/ui/states";
 import { useToast } from "@/components/ui/toast";
 import { formatDate, formatCurrency } from "@/lib/format";
-import { createPurchase } from "./actions";
+import { createPurchase, deletePurchase } from "./actions";
 
 type Vendor = { id: string; name: string };
 type TyreModel = { id: string; brand: string; name: string; size: string };
@@ -73,14 +73,13 @@ export function PurchasesClient({
 }) {
   const router = useRouter();
   const { toast } = useToast();
-  const [purchases, setPurchases] = React.useState(initialPurchases);
-  // Keep client state in sync after server mutations + router.refresh()
-  React.useEffect(() => {
-    setPurchases(initialPurchases);
-  }, [initialPurchases]);
+  const purchases = initialPurchases;
+  const [vendorFilter, setVendorFilter] = React.useState("");
   const [modalOpen, setModalOpen] = React.useState(false);
   const [submitting, setSubmitting] = React.useState(false);
   const [errors, setErrors] = React.useState<Record<string, string>>({});
+  const [deleteTarget, setDeleteTarget] = React.useState<Purchase | null>(null);
+  const [deleteLoading, setDeleteLoading] = React.useState(false);
 
   const [form, setForm] = React.useState({
     vendorId: "",
@@ -176,6 +175,26 @@ export function PurchasesClient({
 
   const resolveModel = (id: string) => tyreModels.find((m) => m.id === id);
 
+  const filtered = React.useMemo(() => {
+    if (!vendorFilter) return purchases;
+    return purchases.filter((p) => p.vendor?.id === vendorFilter);
+  }, [purchases, vendorFilter]);
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleteLoading(true);
+    const result = await deletePurchase(deleteTarget.id);
+    setDeleteLoading(false);
+    if (result.ok) {
+      toast("success", "Purchase deleted successfully");
+      setDeleteTarget(null);
+      router.refresh();
+    } else {
+      toast("error", result.errors?._form ?? "Unable to delete this purchase.");
+      setDeleteTarget(null);
+    }
+  };
+
   return (
     <div>
       <PageHeader
@@ -186,7 +205,21 @@ export function PurchasesClient({
         actionIcon="plus"
       />
 
-      {purchases.length === 0 ? (
+      {vendors.length > 0 && (
+        <div className="mb-4">
+          <Select
+            value={vendorFilter}
+            onChange={(e) => setVendorFilter(e.target.value)}
+            options={[
+              { value: "", label: "All vendors" },
+              ...vendors.map((v) => ({ value: v.id, label: v.name })),
+            ]}
+            aria-label="Filter by vendor"
+          />
+        </div>
+      )}
+
+      {filtered.length === 0 ? (
         <EmptyState
           icon="shopping-cart"
           title="No purchases yet"
@@ -196,8 +229,8 @@ export function PurchasesClient({
         />
       ) : (
         <div className="space-y-3">
-          {purchases.map((p) => (
-            <div key={p.id} className="bg-white rounded-xl border border-border shadow-sm p-4">
+          {filtered.map((p) => (
+            <div key={p.id} className="bg-surface rounded-xl border border-border shadow-sm p-4">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
@@ -215,6 +248,14 @@ export function PurchasesClient({
                     {formatCurrency(p.finalAmount)}
                   </p>
                   <p className="text-xs text-muted">{formatDate(p.purchaseDate)}</p>
+                  <button
+                    onClick={() => setDeleteTarget(p)}
+                    className="mt-2 inline-flex items-center gap-1 px-2 py-1 rounded-lg border border-danger/30 text-xs font-medium text-danger hover:bg-danger-soft transition-colors"
+                    aria-label={`Delete purchase ${p.billNumber}`}
+                  >
+                    <Icon name="trash-2" size={13} />
+                    Delete
+                  </button>
                 </div>
               </div>
               <div className="mt-3 pt-3 border-t border-border space-y-1.5">
@@ -242,6 +283,21 @@ export function PurchasesClient({
           ))}
         </div>
       )}
+
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleDelete}
+        title="Delete Purchase?"
+        message={
+          deleteTarget
+            ? `Delete bill #${deleteTarget.billNumber}? This will also remove all unused tyres from this purchase from inventory. Any tyres that have been installed or used cannot be deleted with the purchase.`
+            : "Delete this purchase?"
+        }
+        confirmLabel="Delete"
+        danger
+        loading={deleteLoading}
+      />
 
       <Dialog
         open={modalOpen}

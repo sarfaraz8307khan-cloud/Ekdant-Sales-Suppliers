@@ -454,10 +454,6 @@ export type VehicleTypeScalarRelationFilter = {
   isNot?: Prisma.VehicleTypeWhereInput
 }
 
-export type EnumEntityStatusFieldUpdateOperationsInput = {
-  set?: $Enums.EntityStatus
-}
-
 export type VehicleTypeCreateNestedOneWithoutAxlesInput = {
   create?: Prisma.XOR<Prisma.VehicleTypeCreateWithoutAxlesInput, Prisma.VehicleTypeUncheckedCreateWithoutAxlesInput>
   connectOrCreate?: Prisma.VehicleTypeCreateOrConnectWithoutAxlesInput

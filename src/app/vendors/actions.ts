@@ -100,6 +100,46 @@ export async function updateVendor(id: string, data: VendorFormData) {
   }
 }
 
+export async function deleteVendor(id: string) {
+  try {
+    const vendor = await db.vendor.findUnique({
+      where: { id },
+      include: {
+        purchases: { select: { id: true } },
+        tyres: { select: { id: true } },
+        expenditures: { select: { id: true } },
+      },
+    });
+    if (!vendor) return { ok: false, errors: { _form: "Vendor not found." } };
+
+    if (vendor.purchases.length > 0 || vendor.tyres.length > 0 || vendor.expenditures.length > 0) {
+      return {
+        ok: false,
+        errors: {
+          _form:
+            "This vendor is linked to purchase, tyre or expense records and cannot be permanently deleted. Deactivate it instead.",
+        },
+      };
+    }
+
+    await db.vendor.delete({ where: { id } });
+
+    await logActivity({
+      action: "DELETE",
+      entityType: "Vendor",
+      entityId: id,
+      description: `Vendor "${vendor.name}" deleted`,
+      previousValue: vendor.name,
+    });
+
+    revalidatePath("/vendors");
+    return { ok: true };
+  } catch (error) {
+    console.error("deleteVendor failed:", error);
+    return { ok: false, errors: { _form: "Unable to delete this vendor. Please try again." } };
+  }
+}
+
 export async function setVendorStatus(id: string, status: "ACTIVE" | "INACTIVE") {
   try {
     const vendor = await db.vendor.update({

@@ -1,4 +1,5 @@
 import {
+  CirclePlus,
   LayoutDashboard,
   Truck,
   Package,
@@ -46,6 +47,10 @@ import {
   Printer,
   ArrowUpDown,
   Upload,
+  PackageMinus,
+  Wallet,
+  Power,
+  PowerOff,
   type LucideIcon,
 } from "lucide-react";
 
@@ -62,6 +67,7 @@ const iconMap: Record<string, LucideIcon> = {
   "bar-chart-3": BarChart3,
   settings: Settings,
   plus: Plus,
+  "plus-circle": CirclePlus,
   search: Search,
   x: X,
   "chevron-right": ChevronRight,
@@ -97,6 +103,10 @@ const iconMap: Record<string, LucideIcon> = {
   printer: Printer,
   "arrow-up-down": ArrowUpDown,
   upload: Upload,
+  "package-minus": PackageMinus,
+  wallet: Wallet,
+  power: Power,
+  "power-off": PowerOff,
 };
 
 export function Icon({

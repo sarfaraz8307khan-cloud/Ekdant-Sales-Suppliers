@@ -262,6 +262,7 @@ export type VehicleWhereInput = {
   odometerReadings?: Prisma.OdometerReadingListRelationFilter
   activityLogs?: Prisma.ActivityLogListRelationFilter
   currentTyres?: Prisma.TyreListRelationFilter
+  expenditures?: Prisma.ExpenditureListRelationFilter
 }
 
 export type VehicleOrderByWithRelationInput = {
@@ -281,6 +282,7 @@ export type VehicleOrderByWithRelationInput = {
   odometerReadings?: Prisma.OdometerReadingOrderByRelationAggregateInput
   activityLogs?: Prisma.ActivityLogOrderByRelationAggregateInput
   currentTyres?: Prisma.TyreOrderByRelationAggregateInput
+  expenditures?: Prisma.ExpenditureOrderByRelationAggregateInput
 }
 
 export type VehicleWhereUniqueInput = Prisma.AtLeast<{
@@ -303,6 +305,7 @@ export type VehicleWhereUniqueInput = Prisma.AtLeast<{
   odometerReadings?: Prisma.OdometerReadingListRelationFilter
   activityLogs?: Prisma.ActivityLogListRelationFilter
   currentTyres?: Prisma.TyreListRelationFilter
+  expenditures?: Prisma.ExpenditureListRelationFilter
 }, "id" | "registrationNo">
 
 export type VehicleOrderByWithAggregationInput = {
@@ -354,6 +357,7 @@ export type VehicleCreateInput = {
   odometerReadings?: Prisma.OdometerReadingCreateNestedManyWithoutVehicleInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutVehicleInput
   currentTyres?: Prisma.TyreCreateNestedManyWithoutCurrentVehicleInput
+  expenditures?: Prisma.ExpenditureCreateNestedManyWithoutVehicleInput
 }
 
 export type VehicleUncheckedCreateInput = {
@@ -371,6 +375,7 @@ export type VehicleUncheckedCreateInput = {
   odometerReadings?: Prisma.OdometerReadingUncheckedCreateNestedManyWithoutVehicleInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutVehicleInput
   currentTyres?: Prisma.TyreUncheckedCreateNestedManyWithoutCurrentVehicleInput
+  expenditures?: Prisma.ExpenditureUncheckedCreateNestedManyWithoutVehicleInput
 }
 
 export type VehicleUpdateInput = {
@@ -388,6 +393,7 @@ export type VehicleUpdateInput = {
   odometerReadings?: Prisma.OdometerReadingUpdateManyWithoutVehicleNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutVehicleNestedInput
   currentTyres?: Prisma.TyreUpdateManyWithoutCurrentVehicleNestedInput
+  expenditures?: Prisma.ExpenditureUpdateManyWithoutVehicleNestedInput
 }
 
 export type VehicleUncheckedUpdateInput = {
@@ -405,6 +411,7 @@ export type VehicleUncheckedUpdateInput = {
   odometerReadings?: Prisma.OdometerReadingUncheckedUpdateManyWithoutVehicleNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutVehicleNestedInput
   currentTyres?: Prisma.TyreUncheckedUpdateManyWithoutCurrentVehicleNestedInput
+  expenditures?: Prisma.ExpenditureUncheckedUpdateManyWithoutVehicleNestedInput
 }
 
 export type VehicleCreateManyInput = {
@@ -639,6 +646,22 @@ export type VehicleUpdateOneRequiredWithoutOdometerReadingsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.VehicleUpdateToOneWithWhereWithoutOdometerReadingsInput, Prisma.VehicleUpdateWithoutOdometerReadingsInput>, Prisma.VehicleUncheckedUpdateWithoutOdometerReadingsInput>
 }
 
+export type VehicleCreateNestedOneWithoutExpendituresInput = {
+  create?: Prisma.XOR<Prisma.VehicleCreateWithoutExpendituresInput, Prisma.VehicleUncheckedCreateWithoutExpendituresInput>
+  connectOrCreate?: Prisma.VehicleCreateOrConnectWithoutExpendituresInput
+  connect?: Prisma.VehicleWhereUniqueInput
+}
+
+export type VehicleUpdateOneWithoutExpendituresNestedInput = {
+  create?: Prisma.XOR<Prisma.VehicleCreateWithoutExpendituresInput, Prisma.VehicleUncheckedCreateWithoutExpendituresInput>
+  connectOrCreate?: Prisma.VehicleCreateOrConnectWithoutExpendituresInput
+  upsert?: Prisma.VehicleUpsertWithoutExpendituresInput
+  disconnect?: Prisma.VehicleWhereInput | boolean
+  delete?: Prisma.VehicleWhereInput | boolean
+  connect?: Prisma.VehicleWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.VehicleUpdateToOneWithWhereWithoutExpendituresInput, Prisma.VehicleUpdateWithoutExpendituresInput>, Prisma.VehicleUncheckedUpdateWithoutExpendituresInput>
+}
+
 export type VehicleCreateNestedOneWithoutActivityLogsInput = {
   create?: Prisma.XOR<Prisma.VehicleCreateWithoutActivityLogsInput, Prisma.VehicleUncheckedCreateWithoutActivityLogsInput>
   connectOrCreate?: Prisma.VehicleCreateOrConnectWithoutActivityLogsInput
@@ -669,6 +692,7 @@ export type VehicleCreateWithoutVehicleTypeInput = {
   odometerReadings?: Prisma.OdometerReadingCreateNestedManyWithoutVehicleInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutVehicleInput
   currentTyres?: Prisma.TyreCreateNestedManyWithoutCurrentVehicleInput
+  expenditures?: Prisma.ExpenditureCreateNestedManyWithoutVehicleInput
 }
 
 export type VehicleUncheckedCreateWithoutVehicleTypeInput = {
@@ -685,6 +709,7 @@ export type VehicleUncheckedCreateWithoutVehicleTypeInput = {
   odometerReadings?: Prisma.OdometerReadingUncheckedCreateNestedManyWithoutVehicleInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutVehicleInput
   currentTyres?: Prisma.TyreUncheckedCreateNestedManyWithoutCurrentVehicleInput
+  expenditures?: Prisma.ExpenditureUncheckedCreateNestedManyWithoutVehicleInput
 }
 
 export type VehicleCreateOrConnectWithoutVehicleTypeInput = {
@@ -742,6 +767,7 @@ export type VehicleCreateWithoutDriverInput = {
   odometerReadings?: Prisma.OdometerReadingCreateNestedManyWithoutVehicleInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutVehicleInput
   currentTyres?: Prisma.TyreCreateNestedManyWithoutCurrentVehicleInput
+  expenditures?: Prisma.ExpenditureCreateNestedManyWithoutVehicleInput
 }
 
 export type VehicleUncheckedCreateWithoutDriverInput = {
@@ -758,6 +784,7 @@ export type VehicleUncheckedCreateWithoutDriverInput = {
   odometerReadings?: Prisma.OdometerReadingUncheckedCreateNestedManyWithoutVehicleInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutVehicleInput
   currentTyres?: Prisma.TyreUncheckedCreateNestedManyWithoutCurrentVehicleInput
+  expenditures?: Prisma.ExpenditureUncheckedCreateNestedManyWithoutVehicleInput
 }
 
 export type VehicleCreateOrConnectWithoutDriverInput = {
@@ -799,6 +826,7 @@ export type VehicleCreateWithoutCurrentTyresInput = {
   installations?: Prisma.InstallationCreateNestedManyWithoutVehicleInput
   odometerReadings?: Prisma.OdometerReadingCreateNestedManyWithoutVehicleInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutVehicleInput
+  expenditures?: Prisma.ExpenditureCreateNestedManyWithoutVehicleInput
 }
 
 export type VehicleUncheckedCreateWithoutCurrentTyresInput = {
@@ -815,6 +843,7 @@ export type VehicleUncheckedCreateWithoutCurrentTyresInput = {
   installations?: Prisma.InstallationUncheckedCreateNestedManyWithoutVehicleInput
   odometerReadings?: Prisma.OdometerReadingUncheckedCreateNestedManyWithoutVehicleInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutVehicleInput
+  expenditures?: Prisma.ExpenditureUncheckedCreateNestedManyWithoutVehicleInput
 }
 
 export type VehicleCreateOrConnectWithoutCurrentTyresInput = {
@@ -847,6 +876,7 @@ export type VehicleUpdateWithoutCurrentTyresInput = {
   installations?: Prisma.InstallationUpdateManyWithoutVehicleNestedInput
   odometerReadings?: Prisma.OdometerReadingUpdateManyWithoutVehicleNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutVehicleNestedInput
+  expenditures?: Prisma.ExpenditureUpdateManyWithoutVehicleNestedInput
 }
 
 export type VehicleUncheckedUpdateWithoutCurrentTyresInput = {
@@ -863,6 +893,7 @@ export type VehicleUncheckedUpdateWithoutCurrentTyresInput = {
   installations?: Prisma.InstallationUncheckedUpdateManyWithoutVehicleNestedInput
   odometerReadings?: Prisma.OdometerReadingUncheckedUpdateManyWithoutVehicleNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutVehicleNestedInput
+  expenditures?: Prisma.ExpenditureUncheckedUpdateManyWithoutVehicleNestedInput
 }
 
 export type VehicleCreateWithoutInstallationsInput = {
@@ -879,6 +910,7 @@ export type VehicleCreateWithoutInstallationsInput = {
   odometerReadings?: Prisma.OdometerReadingCreateNestedManyWithoutVehicleInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutVehicleInput
   currentTyres?: Prisma.TyreCreateNestedManyWithoutCurrentVehicleInput
+  expenditures?: Prisma.ExpenditureCreateNestedManyWithoutVehicleInput
 }
 
 export type VehicleUncheckedCreateWithoutInstallationsInput = {
@@ -895,6 +927,7 @@ export type VehicleUncheckedCreateWithoutInstallationsInput = {
   odometerReadings?: Prisma.OdometerReadingUncheckedCreateNestedManyWithoutVehicleInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutVehicleInput
   currentTyres?: Prisma.TyreUncheckedCreateNestedManyWithoutCurrentVehicleInput
+  expenditures?: Prisma.ExpenditureUncheckedCreateNestedManyWithoutVehicleInput
 }
 
 export type VehicleCreateOrConnectWithoutInstallationsInput = {
@@ -927,6 +960,7 @@ export type VehicleUpdateWithoutInstallationsInput = {
   odometerReadings?: Prisma.OdometerReadingUpdateManyWithoutVehicleNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutVehicleNestedInput
   currentTyres?: Prisma.TyreUpdateManyWithoutCurrentVehicleNestedInput
+  expenditures?: Prisma.ExpenditureUpdateManyWithoutVehicleNestedInput
 }
 
 export type VehicleUncheckedUpdateWithoutInstallationsInput = {
@@ -943,6 +977,7 @@ export type VehicleUncheckedUpdateWithoutInstallationsInput = {
   odometerReadings?: Prisma.OdometerReadingUncheckedUpdateManyWithoutVehicleNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutVehicleNestedInput
   currentTyres?: Prisma.TyreUncheckedUpdateManyWithoutCurrentVehicleNestedInput
+  expenditures?: Prisma.ExpenditureUncheckedUpdateManyWithoutVehicleNestedInput
 }
 
 export type VehicleCreateWithoutOdometerReadingsInput = {
@@ -959,6 +994,7 @@ export type VehicleCreateWithoutOdometerReadingsInput = {
   installations?: Prisma.InstallationCreateNestedManyWithoutVehicleInput
   activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutVehicleInput
   currentTyres?: Prisma.TyreCreateNestedManyWithoutCurrentVehicleInput
+  expenditures?: Prisma.ExpenditureCreateNestedManyWithoutVehicleInput
 }
 
 export type VehicleUncheckedCreateWithoutOdometerReadingsInput = {
@@ -975,6 +1011,7 @@ export type VehicleUncheckedCreateWithoutOdometerReadingsInput = {
   installations?: Prisma.InstallationUncheckedCreateNestedManyWithoutVehicleInput
   activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutVehicleInput
   currentTyres?: Prisma.TyreUncheckedCreateNestedManyWithoutCurrentVehicleInput
+  expenditures?: Prisma.ExpenditureUncheckedCreateNestedManyWithoutVehicleInput
 }
 
 export type VehicleCreateOrConnectWithoutOdometerReadingsInput = {
@@ -1007,6 +1044,7 @@ export type VehicleUpdateWithoutOdometerReadingsInput = {
   installations?: Prisma.InstallationUpdateManyWithoutVehicleNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutVehicleNestedInput
   currentTyres?: Prisma.TyreUpdateManyWithoutCurrentVehicleNestedInput
+  expenditures?: Prisma.ExpenditureUpdateManyWithoutVehicleNestedInput
 }
 
 export type VehicleUncheckedUpdateWithoutOdometerReadingsInput = {
@@ -1021,6 +1059,91 @@ export type VehicleUncheckedUpdateWithoutOdometerReadingsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   installations?: Prisma.InstallationUncheckedUpdateManyWithoutVehicleNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutVehicleNestedInput
+  currentTyres?: Prisma.TyreUncheckedUpdateManyWithoutCurrentVehicleNestedInput
+  expenditures?: Prisma.ExpenditureUncheckedUpdateManyWithoutVehicleNestedInput
+}
+
+export type VehicleCreateWithoutExpendituresInput = {
+  id?: string
+  registrationNo: string
+  currentOdometer?: number
+  status?: $Enums.EntityStatus
+  notes?: string | null
+  photoPath?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  vehicleType: Prisma.VehicleTypeCreateNestedOneWithoutVehiclesInput
+  driver?: Prisma.DriverCreateNestedOneWithoutVehiclesInput
+  installations?: Prisma.InstallationCreateNestedManyWithoutVehicleInput
+  odometerReadings?: Prisma.OdometerReadingCreateNestedManyWithoutVehicleInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutVehicleInput
+  currentTyres?: Prisma.TyreCreateNestedManyWithoutCurrentVehicleInput
+}
+
+export type VehicleUncheckedCreateWithoutExpendituresInput = {
+  id?: string
+  registrationNo: string
+  vehicleTypeId: string
+  currentOdometer?: number
+  driverId?: string | null
+  status?: $Enums.EntityStatus
+  notes?: string | null
+  photoPath?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  installations?: Prisma.InstallationUncheckedCreateNestedManyWithoutVehicleInput
+  odometerReadings?: Prisma.OdometerReadingUncheckedCreateNestedManyWithoutVehicleInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutVehicleInput
+  currentTyres?: Prisma.TyreUncheckedCreateNestedManyWithoutCurrentVehicleInput
+}
+
+export type VehicleCreateOrConnectWithoutExpendituresInput = {
+  where: Prisma.VehicleWhereUniqueInput
+  create: Prisma.XOR<Prisma.VehicleCreateWithoutExpendituresInput, Prisma.VehicleUncheckedCreateWithoutExpendituresInput>
+}
+
+export type VehicleUpsertWithoutExpendituresInput = {
+  update: Prisma.XOR<Prisma.VehicleUpdateWithoutExpendituresInput, Prisma.VehicleUncheckedUpdateWithoutExpendituresInput>
+  create: Prisma.XOR<Prisma.VehicleCreateWithoutExpendituresInput, Prisma.VehicleUncheckedCreateWithoutExpendituresInput>
+  where?: Prisma.VehicleWhereInput
+}
+
+export type VehicleUpdateToOneWithWhereWithoutExpendituresInput = {
+  where?: Prisma.VehicleWhereInput
+  data: Prisma.XOR<Prisma.VehicleUpdateWithoutExpendituresInput, Prisma.VehicleUncheckedUpdateWithoutExpendituresInput>
+}
+
+export type VehicleUpdateWithoutExpendituresInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationNo?: Prisma.StringFieldUpdateOperationsInput | string
+  currentOdometer?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  photoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  vehicleType?: Prisma.VehicleTypeUpdateOneRequiredWithoutVehiclesNestedInput
+  driver?: Prisma.DriverUpdateOneWithoutVehiclesNestedInput
+  installations?: Prisma.InstallationUpdateManyWithoutVehicleNestedInput
+  odometerReadings?: Prisma.OdometerReadingUpdateManyWithoutVehicleNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutVehicleNestedInput
+  currentTyres?: Prisma.TyreUpdateManyWithoutCurrentVehicleNestedInput
+}
+
+export type VehicleUncheckedUpdateWithoutExpendituresInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  registrationNo?: Prisma.StringFieldUpdateOperationsInput | string
+  vehicleTypeId?: Prisma.StringFieldUpdateOperationsInput | string
+  currentOdometer?: Prisma.IntFieldUpdateOperationsInput | number
+  driverId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  photoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  installations?: Prisma.InstallationUncheckedUpdateManyWithoutVehicleNestedInput
+  odometerReadings?: Prisma.OdometerReadingUncheckedUpdateManyWithoutVehicleNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutVehicleNestedInput
   currentTyres?: Prisma.TyreUncheckedUpdateManyWithoutCurrentVehicleNestedInput
 }
@@ -1039,6 +1162,7 @@ export type VehicleCreateWithoutActivityLogsInput = {
   installations?: Prisma.InstallationCreateNestedManyWithoutVehicleInput
   odometerReadings?: Prisma.OdometerReadingCreateNestedManyWithoutVehicleInput
   currentTyres?: Prisma.TyreCreateNestedManyWithoutCurrentVehicleInput
+  expenditures?: Prisma.ExpenditureCreateNestedManyWithoutVehicleInput
 }
 
 export type VehicleUncheckedCreateWithoutActivityLogsInput = {
@@ -1055,6 +1179,7 @@ export type VehicleUncheckedCreateWithoutActivityLogsInput = {
   installations?: Prisma.InstallationUncheckedCreateNestedManyWithoutVehicleInput
   odometerReadings?: Prisma.OdometerReadingUncheckedCreateNestedManyWithoutVehicleInput
   currentTyres?: Prisma.TyreUncheckedCreateNestedManyWithoutCurrentVehicleInput
+  expenditures?: Prisma.ExpenditureUncheckedCreateNestedManyWithoutVehicleInput
 }
 
 export type VehicleCreateOrConnectWithoutActivityLogsInput = {
@@ -1087,6 +1212,7 @@ export type VehicleUpdateWithoutActivityLogsInput = {
   installations?: Prisma.InstallationUpdateManyWithoutVehicleNestedInput
   odometerReadings?: Prisma.OdometerReadingUpdateManyWithoutVehicleNestedInput
   currentTyres?: Prisma.TyreUpdateManyWithoutCurrentVehicleNestedInput
+  expenditures?: Prisma.ExpenditureUpdateManyWithoutVehicleNestedInput
 }
 
 export type VehicleUncheckedUpdateWithoutActivityLogsInput = {
@@ -1103,6 +1229,7 @@ export type VehicleUncheckedUpdateWithoutActivityLogsInput = {
   installations?: Prisma.InstallationUncheckedUpdateManyWithoutVehicleNestedInput
   odometerReadings?: Prisma.OdometerReadingUncheckedUpdateManyWithoutVehicleNestedInput
   currentTyres?: Prisma.TyreUncheckedUpdateManyWithoutCurrentVehicleNestedInput
+  expenditures?: Prisma.ExpenditureUncheckedUpdateManyWithoutVehicleNestedInput
 }
 
 export type VehicleCreateManyVehicleTypeInput = {
@@ -1131,6 +1258,7 @@ export type VehicleUpdateWithoutVehicleTypeInput = {
   odometerReadings?: Prisma.OdometerReadingUpdateManyWithoutVehicleNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutVehicleNestedInput
   currentTyres?: Prisma.TyreUpdateManyWithoutCurrentVehicleNestedInput
+  expenditures?: Prisma.ExpenditureUpdateManyWithoutVehicleNestedInput
 }
 
 export type VehicleUncheckedUpdateWithoutVehicleTypeInput = {
@@ -1147,6 +1275,7 @@ export type VehicleUncheckedUpdateWithoutVehicleTypeInput = {
   odometerReadings?: Prisma.OdometerReadingUncheckedUpdateManyWithoutVehicleNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutVehicleNestedInput
   currentTyres?: Prisma.TyreUncheckedUpdateManyWithoutCurrentVehicleNestedInput
+  expenditures?: Prisma.ExpenditureUncheckedUpdateManyWithoutVehicleNestedInput
 }
 
 export type VehicleUncheckedUpdateManyWithoutVehicleTypeInput = {
@@ -1187,6 +1316,7 @@ export type VehicleUpdateWithoutDriverInput = {
   odometerReadings?: Prisma.OdometerReadingUpdateManyWithoutVehicleNestedInput
   activityLogs?: Prisma.ActivityLogUpdateManyWithoutVehicleNestedInput
   currentTyres?: Prisma.TyreUpdateManyWithoutCurrentVehicleNestedInput
+  expenditures?: Prisma.ExpenditureUpdateManyWithoutVehicleNestedInput
 }
 
 export type VehicleUncheckedUpdateWithoutDriverInput = {
@@ -1203,6 +1333,7 @@ export type VehicleUncheckedUpdateWithoutDriverInput = {
   odometerReadings?: Prisma.OdometerReadingUncheckedUpdateManyWithoutVehicleNestedInput
   activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutVehicleNestedInput
   currentTyres?: Prisma.TyreUncheckedUpdateManyWithoutCurrentVehicleNestedInput
+  expenditures?: Prisma.ExpenditureUncheckedUpdateManyWithoutVehicleNestedInput
 }
 
 export type VehicleUncheckedUpdateManyWithoutDriverInput = {
@@ -1227,6 +1358,7 @@ export type VehicleCountOutputType = {
   odometerReadings: number
   activityLogs: number
   currentTyres: number
+  expenditures: number
 }
 
 export type VehicleCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1234,6 +1366,7 @@ export type VehicleCountOutputTypeSelect<ExtArgs extends runtime.Types.Extension
   odometerReadings?: boolean | VehicleCountOutputTypeCountOdometerReadingsArgs
   activityLogs?: boolean | VehicleCountOutputTypeCountActivityLogsArgs
   currentTyres?: boolean | VehicleCountOutputTypeCountCurrentTyresArgs
+  expenditures?: boolean | VehicleCountOutputTypeCountExpendituresArgs
 }
 
 /**
@@ -1274,6 +1407,13 @@ export type VehicleCountOutputTypeCountCurrentTyresArgs<ExtArgs extends runtime.
   where?: Prisma.TyreWhereInput
 }
 
+/**
+ * VehicleCountOutputType without action
+ */
+export type VehicleCountOutputTypeCountExpendituresArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ExpenditureWhereInput
+}
+
 
 export type VehicleSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1292,6 +1432,7 @@ export type VehicleSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   odometerReadings?: boolean | Prisma.Vehicle$odometerReadingsArgs<ExtArgs>
   activityLogs?: boolean | Prisma.Vehicle$activityLogsArgs<ExtArgs>
   currentTyres?: boolean | Prisma.Vehicle$currentTyresArgs<ExtArgs>
+  expenditures?: boolean | Prisma.Vehicle$expendituresArgs<ExtArgs>
   _count?: boolean | Prisma.VehicleCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["vehicle"]>
 
@@ -1346,6 +1487,7 @@ export type VehicleInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   odometerReadings?: boolean | Prisma.Vehicle$odometerReadingsArgs<ExtArgs>
   activityLogs?: boolean | Prisma.Vehicle$activityLogsArgs<ExtArgs>
   currentTyres?: boolean | Prisma.Vehicle$currentTyresArgs<ExtArgs>
+  expenditures?: boolean | Prisma.Vehicle$expendituresArgs<ExtArgs>
   _count?: boolean | Prisma.VehicleCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type VehicleIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1366,6 +1508,7 @@ export type $VehiclePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     odometerReadings: Prisma.$OdometerReadingPayload<ExtArgs>[]
     activityLogs: Prisma.$ActivityLogPayload<ExtArgs>[]
     currentTyres: Prisma.$TyrePayload<ExtArgs>[]
+    expenditures: Prisma.$ExpenditurePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1778,6 +1921,7 @@ export interface Prisma__VehicleClient<T, Null = never, ExtArgs extends runtime.
   odometerReadings<T extends Prisma.Vehicle$odometerReadingsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Vehicle$odometerReadingsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OdometerReadingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   activityLogs<T extends Prisma.Vehicle$activityLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Vehicle$activityLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ActivityLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   currentTyres<T extends Prisma.Vehicle$currentTyresArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Vehicle$currentTyresArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TyrePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  expenditures<T extends Prisma.Vehicle$expendituresArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Vehicle$expendituresArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ExpenditurePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2328,6 +2472,30 @@ export type Vehicle$currentTyresArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   distinct?: Prisma.TyreScalarFieldEnum | Prisma.TyreScalarFieldEnum[]
+}
+
+/**
+ * Vehicle.expenditures
+ */
+export type Vehicle$expendituresArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Expenditure
+   */
+  select?: Prisma.ExpenditureSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Expenditure
+   */
+  omit?: Prisma.ExpenditureOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ExpenditureInclude<ExtArgs> | null
+  where?: Prisma.ExpenditureWhereInput
+  orderBy?: Prisma.ExpenditureOrderByWithRelationInput | Prisma.ExpenditureOrderByWithRelationInput[]
+  cursor?: Prisma.ExpenditureWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ExpenditureScalarFieldEnum | Prisma.ExpenditureScalarFieldEnum[]
 }
 
 /**

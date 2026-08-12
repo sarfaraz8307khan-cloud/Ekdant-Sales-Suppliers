@@ -1,5 +1,6 @@
-import { PrismaClient, Side, PositionType } from "../src/generated/prisma/client";
+import { PrismaClient, Side, PositionType, UserRole } from "../src/generated/prisma/client";
 import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+import bcrypt from "bcryptjs";
 import path from "path";
 
 const adapter = new PrismaBetterSqlite3({
@@ -10,6 +11,21 @@ const db = new PrismaClient({ adapter });
 
 async function main() {
   console.log("🌱 Seeding database...");
+
+  // ── Admin user ────────────────────────────────────────────
+  const adminPasswordHash = await bcrypt.hash("admin123", 12);
+  const adminUser = await db.user.upsert({
+    where: { loginId: "admin" },
+    update: {},
+    create: {
+      loginId: "admin",
+      passwordHash: adminPasswordHash,
+      name: "Administrator",
+      role: UserRole.ADMIN,
+      status: "ACTIVE",
+    },
+  });
+  console.log(`   Admin user: ${adminUser.loginId}`);
 
   // ── Settings ──────────────────────────────────────────────
   const settings = await db.applicationSettings.upsert({
@@ -28,10 +44,10 @@ async function main() {
   // ── Removal reasons ───────────────────────────────────────
   const removalReasons = [
     { name: "Worn Out", description: "Tread worn beyond legal/safe limit" },
-    { name: "Damage", description: "Puncture, cut, bulge or structural damage" },
-    { name: "Burst", description: "Sudden tyre burst" },
-    { name: "Retread", description: "Sent for retreading" },
-    { name: "Scrap", description: "End of life — scrapped" },
+    { name: "Damaged", description: "Puncture, cut, bulge or structural damage" },
+    { name: "Puncture", description: "Punctured and not repairable on site" },
+    { name: "Accident", description: "Damaged in an accident or collision" },
+    { name: "Other", description: "Any other documented reason" },
   ];
   for (const r of removalReasons) {
     await db.removalReason.upsert({
@@ -46,7 +62,7 @@ async function main() {
     {
       name: "12-Tyre Truck",
       description: "Standard 6x4 truck with 12 tyres",
-      axleCount: 3,
+      axleCount: 4,
       tyreCount: 12,
       axles: [
         { axleNumber: 1, name: "Front Axle", sequence: 1, positions: [
@@ -65,13 +81,17 @@ async function main() {
           { positionId: "L3I", displayName: "Drive 2 Left Inner", shortCode: "D2LI", side: "LEFT", sequence: 9, positionType: "DRIVE" },
           { positionId: "R3I", displayName: "Drive 2 Right Inner", shortCode: "D2RI", side: "RIGHT", sequence: 10, positionType: "DRIVE" },
         ]},
+        { axleNumber: 4, name: "Lift Axle", sequence: 4, positions: [
+          { positionId: "LL1", displayName: "Lift Left", shortCode: "LL", side: "LEFT", sequence: 11, positionType: "LIFT" },
+          { positionId: "LR1", displayName: "Lift Right", shortCode: "LR", side: "RIGHT", sequence: 12, positionType: "LIFT" },
+        ]},
       ],
     },
     {
-      name: "13-Tyre Truck",
-      description: "6x4 truck with 13 tyres (single front + dual drive)",
-      axleCount: 3,
-      tyreCount: 13,
+      name: "18-Tyre Bulker",
+      description: "Bulker with 18 tyres (tri-drive + lift + super single)",
+      axleCount: 6,
+      tyreCount: 18,
       axles: [
         { axleNumber: 1, name: "Front Axle", sequence: 1, positions: [
           { positionId: "L1", displayName: "Front Left", shortCode: "FL", side: "LEFT", sequence: 1, positionType: "STEERING" },
@@ -88,15 +108,27 @@ async function main() {
           { positionId: "R3", displayName: "Drive 2 Right", shortCode: "D2R", side: "RIGHT", sequence: 8, positionType: "DRIVE" },
           { positionId: "L3I", displayName: "Drive 2 Left Inner", shortCode: "D2LI", side: "LEFT", sequence: 9, positionType: "DRIVE" },
           { positionId: "R3I", displayName: "Drive 2 Right Inner", shortCode: "D2RI", side: "RIGHT", sequence: 10, positionType: "DRIVE" },
-          { positionId: "L3X", displayName: "Drive 2 Left Extra", shortCode: "D2LX", side: "LEFT", sequence: 11, positionType: "DRIVE" },
-          { positionId: "R3X", displayName: "Drive 2 Right Extra", shortCode: "D2RX", side: "RIGHT", sequence: 12, positionType: "DRIVE" },
+        ]},
+        { axleNumber: 4, name: "Drive Axle 3", sequence: 4, positions: [
+          { positionId: "L4", displayName: "Drive 3 Left", shortCode: "D3L", side: "LEFT", sequence: 11, positionType: "DRIVE" },
+          { positionId: "R4", displayName: "Drive 3 Right", shortCode: "D3R", side: "RIGHT", sequence: 12, positionType: "DRIVE" },
+          { positionId: "L4I", displayName: "Drive 3 Left Inner", shortCode: "D3LI", side: "LEFT", sequence: 13, positionType: "DRIVE" },
+          { positionId: "R4I", displayName: "Drive 3 Right Inner", shortCode: "D3RI", side: "RIGHT", sequence: 14, positionType: "DRIVE" },
+        ]},
+        { axleNumber: 5, name: "Lift Axle", sequence: 5, positions: [
+          { positionId: "LL1", displayName: "Lift Left", shortCode: "LL", side: "LEFT", sequence: 15, positionType: "LIFT" },
+          { positionId: "LR1", displayName: "Lift Right", shortCode: "LR", side: "RIGHT", sequence: 16, positionType: "LIFT" },
+        ]},
+        { axleNumber: 6, name: "Super Single Axle", sequence: 6, positions: [
+          { positionId: "SL1", displayName: "Super Single Left", shortCode: "SSL", side: "LEFT", sequence: 17, positionType: "DRIVE" },
+          { positionId: "SR1", displayName: "Super Single Right", shortCode: "SSR", side: "RIGHT", sequence: 18, positionType: "DRIVE" },
         ]},
       ],
     },
     {
       name: "14-Tyre Truck",
       description: "8x4 truck with 14 tyres",
-      axleCount: 4,
+      axleCount: 5,
       tyreCount: 14,
       axles: [
         { axleNumber: 1, name: "Front Axle", sequence: 1, positions: [
@@ -118,6 +150,10 @@ async function main() {
           { positionId: "R4", displayName: "Drive 2 Right", shortCode: "D2R", side: "RIGHT", sequence: 10, positionType: "DRIVE" },
           { positionId: "L4I", displayName: "Drive 2 Left Inner", shortCode: "D2LI", side: "LEFT", sequence: 11, positionType: "DRIVE" },
           { positionId: "R4I", displayName: "Drive 2 Right Inner", shortCode: "D2RI", side: "RIGHT", sequence: 12, positionType: "DRIVE" },
+        ]},
+        { axleNumber: 5, name: "Lift Axle", sequence: 5, positions: [
+          { positionId: "LL1", displayName: "Lift Left", shortCode: "LL", side: "LEFT", sequence: 13, positionType: "LIFT" },
+          { positionId: "LR1", displayName: "Lift Right", shortCode: "LR", side: "RIGHT", sequence: 14, positionType: "LIFT" },
         ]},
       ],
     },
@@ -200,11 +236,11 @@ async function main() {
 
   // ── Tyre models ───────────────────────────────────────────
   const tyreModels = [
-    { brand: "MRF", name: "Muscle Drive", size: "12.00 R20", minStockLevel: 4, compatible: ["12-Tyre Truck", "13-Tyre Truck", "14-Tyre Truck"] },
-    { brand: "MRF", name: "Steer Master", size: "10.00 R20", minStockLevel: 3, compatible: ["12-Tyre Truck", "13-Tyre Truck", "14-Tyre Truck"] },
-    { brand: "CEAT", name: "Drive Plus", size: "12.00 R20", minStockLevel: 4, compatible: ["12-Tyre Truck", "13-Tyre Truck", "14-Tyre Truck"] },
-    { brand: "Apollo", name: "EnduRace", size: "12.00 R20", minStockLevel: 3, compatible: ["12-Tyre Truck", "13-Tyre Truck", "14-Tyre Truck"] },
-    { brand: "JK Tyre", name: "Trailer King", size: "10.00 R20", minStockLevel: 4, compatible: ["16-Tyre Trailer"] },
+    { brand: "MRF", name: "Muscle Drive", size: "12.00 R20", minStockLevel: 4, compatible: ["12-Tyre Truck", "14-Tyre Truck", "18-Tyre Bulker"] },
+    { brand: "MRF", name: "Steer Master", size: "10.00 R20", minStockLevel: 3, compatible: ["12-Tyre Truck", "14-Tyre Truck", "18-Tyre Bulker"] },
+    { brand: "CEAT", name: "Drive Plus", size: "12.00 R20", minStockLevel: 4, compatible: ["12-Tyre Truck", "14-Tyre Truck", "18-Tyre Bulker"] },
+    { brand: "Apollo", name: "EnduRace", size: "12.00 R20", minStockLevel: 3, compatible: ["12-Tyre Truck", "14-Tyre Truck", "18-Tyre Bulker"] },
+    { brand: "JK Tyre", name: "Trailer King", size: "10.00 R20", minStockLevel: 4, compatible: ["16-Tyre Trailer", "18-Tyre Bulker"] },
   ];
 
   const tyreModelIds: Record<string, string> = {};
@@ -270,9 +306,10 @@ async function main() {
   // ── Vehicles ──────────────────────────────────────────────
   const vehicles = [
     { registrationNo: "MH-12-AB-1234", vehicleType: "12-Tyre Truck", driver: "Rajesh Kumar", odometer: 125450 },
-    { registrationNo: "MH-14-CD-5678", vehicleType: "13-Tyre Truck", driver: "Suresh Yadav", odometer: 98720 },
+    { registrationNo: "MH-14-CD-5678", vehicleType: "14-Tyre Truck", driver: "Suresh Yadav", odometer: 98720 },
     { registrationNo: "MH-12-EF-9012", vehicleType: "14-Tyre Truck", driver: "Vikram Singh", odometer: 152300 },
     { registrationNo: "MH-15-GH-3456", vehicleType: "16-Tyre Trailer", driver: "Mahesh Patil", odometer: 65400 },
+    { registrationNo: "MH-18-IJ-7890", vehicleType: "18-Tyre Bulker", driver: "Suresh Yadav", odometer: 85600 },
   ];
   const vehicleIds: Record<string, string> = {};
   for (const v of vehicles) {
@@ -608,6 +645,60 @@ async function main() {
         },
       });
     }
+  }
+
+  // ── Sample expenditure records ────────────────────────────
+  const expenditureCount = await db.expenditure.count();
+  if (expenditureCount === 0) {
+    const expenditureSamples = [
+      {
+        date: new Date("2026-07-05"),
+        category: "Fuel",
+        description: "Diesel refill",
+        vehicle: "MH-12-AB-1234",
+        quantity: 1,
+        unitCost: 18500,
+        tax: 0,
+        discount: 0,
+      },
+      {
+        date: new Date("2026-07-12"),
+        category: "Maintenance",
+        description: "General service",
+        vehicle: "MH-14-CD-5678",
+        quantity: 1,
+        unitCost: 4500,
+        tax: 0,
+        discount: 0,
+      },
+      {
+        date: new Date("2026-07-20"),
+        category: "Tolls",
+        description: "Monthly toll pass",
+        vehicle: "MH-12-EF-9012",
+        quantity: 1,
+        unitCost: 3200,
+        tax: 0,
+        discount: 0,
+      },
+    ];
+    for (const e of expenditureSamples) {
+      const total = e.quantity * e.unitCost + e.tax - e.discount;
+      await db.expenditure.create({
+        data: {
+          date: e.date,
+          category: e.category,
+          description: e.description,
+          vehicleId: vehicleIds[e.vehicle],
+          quantity: e.quantity,
+          unitCost: e.unitCost,
+          tax: e.tax,
+          discount: e.discount,
+          total,
+        },
+      });
+    }
+    console.log(`   Expenditures: ${expenditureSamples.length}`);
   }
 
   console.log("✅ Seed complete!");

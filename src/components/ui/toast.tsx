@@ -54,7 +54,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
           <div
             key={t.id}
             className={cn(
-              "flex items-start gap-2.5 bg-white rounded-xl border border-border shadow-lg px-4 py-3 animate-fade-in-up"
+              "flex items-start gap-2.5 bg-surface rounded-xl border border-border shadow-lg px-4 py-3 animate-fade-in-up"
             )}
           >
             <Icon

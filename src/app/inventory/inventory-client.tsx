@@ -1,240 +1,380 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/ui/page";
-import { SearchInput } from "@/components/ui/search-input";
+import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
-import { StatusBadge } from "@/components/ui/badge";
 import { Icon } from "@/components/ui/icon";
-import { EmptyState } from "@/components/ui/states";
 import { useToast } from "@/components/ui/toast";
-import { formatDate, formatCurrency } from "@/lib/format";
-import { setTyreStatus } from "./actions";
-import type { TyreStatus } from "@/lib/types";
+import { EmptyState } from "@/components/ui/states";
+import { cn } from "@/lib/utils";
+import { adjustInventory } from "./actions";
 
-type Tyre = {
+type ModelSummary = {
   id: string;
-  internalId: string;
-  status: TyreStatus;
-  purchaseDate: Date | null;
-  unitPrice: string | number | null;
-  tyreModel: { id: string; brand: string; name: string; size: string };
-  vendor: { id: string; name: string } | null;
-  purchase: { id: string; billNumber: string } | null;
-  currentVehicle: { id: string; registrationNo: string } | null;
-  currentPosition: { id: string; displayName: string } | null;
+  brand: string;
+  name: string;
+  size: string;
+  minStockLevel: number;
+  available: number;
+  removed: number;
+  total: number;
+  lowStock: boolean;
 };
 
-const STATUS_OPTIONS: TyreStatus[] = [
-  "AVAILABLE",
-  "RESERVED",
-  "INSTALLED",
-  "REMOVED",
-  "WORN_OUT",
-  "DAMAGED",
-  "SCRAPPED",
-];
+type RemovalItem = {
+  id: string;
+  tyreModel: string;
+  vehicleReg: string;
+  position: string;
+  removedAt: string;
+  odometer: number | null;
+};
+
+type Tab = "ALL" | "AVAILABLE" | "REMOVED";
 
 export function InventoryClient({
-  initialTyres,
+  models,
+  removalItems,
+  lowStockThresholds,
 }: {
-  initialTyres: Tyre[];
+  models: ModelSummary[];
+  removalItems: RemovalItem[];
+  lowStockThresholds: { modelId: string; available: number; minimum: number }[];
 }) {
-  const router = useRouter();
   const { toast } = useToast();
-  const [tyres, setTyres] = React.useState(initialTyres);
-  // Keep client state in sync after server mutations + router.refresh()
-  React.useEffect(() => {
-    setTyres(initialTyres);
-  }, [initialTyres]);
-  const [search, setSearch] = React.useState("");
-  const [statusFilter, setStatusFilter] = React.useState<TyreStatus | "ALL">("ALL");
-  const [statusTarget, setStatusTarget] = React.useState<Tyre | null>(null);
-  const [statusLoading, setStatusLoading] = React.useState(false);
-
-  const filtered = React.useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return tyres.filter((t) => {
-      if (statusFilter !== "ALL" && t.status !== statusFilter) return false;
-      if (!q) return true;
-      return (
-        t.internalId.toLowerCase().includes(q) ||
-        t.tyreModel.brand.toLowerCase().includes(q) ||
-        t.tyreModel.name.toLowerCase().includes(q) ||
-        t.tyreModel.size.toLowerCase().includes(q) ||
-        (t.vendor?.name.toLowerCase().includes(q) ?? false) ||
-        (t.purchase?.billNumber.toLowerCase().includes(q) ?? false) ||
-        (t.currentVehicle?.registrationNo.toLowerCase().includes(q) ?? false)
-      );
-    });
-  }, [tyres, search, statusFilter]);
+  const [tab, setTab] = React.useState<Tab>("ALL");
+  const [filterModel, setFilterModel] = React.useState("all");
+  const [sort, setSort] = React.useState<"asc" | "desc">("desc");
+  const [adjustOpen, setAdjustOpen] = React.useState(false);
+  const [pending, setPending] = React.useState(false);
+  const [adjustModel, setAdjustModel] = React.useState("");
+  const [adjustQty, setAdjustQty] = React.useState("");
+  const [adjustReason, setAdjustReason] = React.useState("");
+  const [adjustNotes, setAdjustNotes] = React.useState("");
+  const [adjustError, setAdjustError] = React.useState<string | null>(null);
 
   const stats = React.useMemo(() => {
-    const count = (s: TyreStatus) => tyres.filter((t) => t.status === s).length;
-    return {
-      available: count("AVAILABLE"),
-      installed: count("INSTALLED"),
-      removed: count("REMOVED") + count("SCRAPPED") + count("WORN_OUT"),
-      total: tyres.length,
-    };
-  }, [tyres]);
+    const available = models.reduce((s, m) => s + m.available, 0);
+    const removed = models.reduce((s, m) => s + m.removed, 0);
+    const total = models.reduce((s, m) => s + m.total, 0);
+    return { available, removed, total };
+  }, [models]);
 
-  const handleStatusChange = async (newStatus: TyreStatus) => {
-    if (!statusTarget) return;
-    setStatusLoading(true);
-    const result = await setTyreStatus(statusTarget.id, newStatus);
-    setStatusLoading(false);
+  const filteredModels = React.useMemo(() => {
+    let list = [...models];
+    if (filterModel !== "all") {
+      list = list.filter((m) => m.id === filterModel);
+    }
+    list = list.filter((m) => {
+      if (tab === "AVAILABLE") return m.available > 0 || m.total === 0;
+      if (tab === "REMOVED") return m.removed > 0;
+      return true;
+    });
+    list.sort((a, b) => {
+      const label = (m: ModelSummary) => `${m.brand} ${m.name}`.toLowerCase();
+      const diff = label(a).localeCompare(label(b));
+      return sort === "asc" ? diff : -diff;
+    });
+    return list;
+  }, [models, tab, filterModel, sort]);
+
+  const closedDialog = () => {
+    setAdjustOpen(false);
+    setAdjustModel("");
+    setAdjustQty("");
+    setAdjustReason("");
+    setAdjustNotes("");
+    setAdjustError(null);
+  };
+
+  const handleAdjust = async () => {
+    setPending(true);
+    setAdjustError(null);
+    const result = await adjustInventory({
+      tyreModelId: adjustModel,
+      quantity: Number(adjustQty),
+      reason: adjustReason,
+      notes: adjustNotes || undefined,
+    });
+    setPending(false);
     if (result.ok) {
-      toast("success", `Tyre ${statusTarget.internalId} marked as ${newStatus}`);
-      setStatusTarget(null);
-      router.refresh();
+      toast("success", "Inventory adjusted successfully");
+      closedDialog();
     } else {
-      toast("error", result.errors?._form ?? "Failed to update tyre status");
+      setAdjustError(Object.values(result.errors)[0] ?? "Unable to adjust inventory.");
     }
   };
+
+  const adjustSelectedModel = models.find((m) => m.id === adjustModel);
 
   return (
     <div>
       <PageHeader
         title="Inventory"
-        description="Track every physical tyre in the fleet"
-        actionLabel="Purchase Tyres"
-        onAction={() => router.push("/purchases")}
-        actionIcon="shopping-cart"
+        description="Available tyres by model"
+        actionLabel="Adjust Inventory"
+        actionIcon="arrow-down-circle"
+        onAction={() => setAdjustOpen(true)}
       />
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-        <StatCard label="Available" value={stats.available} tone="success" />
-        <StatCard label="Installed" value={stats.installed} tone="primary" />
-        <StatCard label="Removed" value={stats.removed} tone="warning" />
-        <StatCard label="Total" value={stats.total} tone="muted" />
+
+      {/* Summary cards */}
+      <div className="grid grid-cols-3 gap-3 mb-5">
+        <SummaryCard label="Available" value={stats.available} tone="success" />
+        <SummaryCard label="Removed" value={stats.removed} tone="muted" />
+        <SummaryCard label="Total" value={stats.total} tone="primary" />
       </div>
-      <SearchInput
-        value={search}
-        onChange={setSearch}
-        placeholder="Search by tyre ID, brand, model, vehicle..."
-        className="mb-3"
-      />
-      <div className="flex gap-2 overflow-x-auto pb-2 mb-4 -mx-4 px-4">
-        <FilterChip label="All" active={statusFilter === "ALL"} onClick={() => setStatusFilter("ALL")} />
-        {STATUS_OPTIONS.map((s) => (
-          <FilterChip
-            key={s}
-            label={s.replace("_", " ")}
-            active={statusFilter === s}
-            onClick={() => setStatusFilter(s)}
-          />
+
+      {/* Low stock alert */}
+      {lowStockThresholds.length > 0 && (
+        <div className="rounded-xl border border-warning/30 bg-warning-soft p-4 mb-5">
+          <div className="flex items-center gap-2 mb-2">
+            <Icon name="alert-triangle" size={18} className="text-warning" />
+            <h2 className="font-semibold text-warning text-sm">⚠ LOW STOCK</h2>
+          </div>
+          <div className="space-y-1.5">
+            {lowStockThresholds.map((l) => {
+              const model = models.find((m) => m.id === l.modelId);
+              return (
+                <p key={l.modelId} className="text-sm text-foreground">
+                  <span className="font-medium">{model ? `${model.brand} ${model.name}` : "Model"}</span>
+                  <span className="text-muted">
+                    {" "}
+                    — Available: {l.available} · Minimum: {l.minimum}
+                  </span>
+                </p>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Tabs */}
+      <div className="flex gap-1 rounded-lg bg-muted-soft p-1 mb-4 overflow-x-auto">
+        {(["ALL", "AVAILABLE", "REMOVED"] as Tab[]).map((t) => (
+          <button
+            key={t}
+            type="button"
+            onClick={() => setTab(t)}
+            className={cn(
+              "flex-1 min-w-[90px] px-3 py-2 rounded-md text-sm font-medium transition-colors",
+              tab === t ? "bg-background shadow-sm text-primary" : "text-muted hover:text-foreground"
+            )}
+          >
+            {t}
+          </button>
         ))}
       </div>
-      {filtered.length === 0 ? (
-        <EmptyState
-          icon="package"
-          title={search || statusFilter !== "ALL" ? "No tyres found" : "No tyres in inventory"}
-          description={
-            search || statusFilter !== "ALL"
-              ? "Try adjusting your search or filters."
-              : "Purchase tyres to add them to inventory."
-          }
-          actionLabel={search || statusFilter !== "ALL" ? undefined : "Purchase Tyres"}
-          onAction={search || statusFilter !== "ALL" ? undefined : () => router.push("/purchases")}
-        />
+
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row gap-2 mb-4">
+        <select
+          value={filterModel}
+          onChange={(e) => setFilterModel(e.target.value)}
+          className="h-10 flex-1 rounded-lg border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+          aria-label="Filter by model"
+        >
+          <option value="all">All models</option>
+          {models.map((m) => (
+            <option key={m.id} value={m.id}>
+              {m.brand} {m.name} {m.size}
+            </option>
+          ))}
+        </select>
+        <select
+          value={sort}
+          onChange={(e) => setSort(e.target.value as "asc" | "desc")}
+          className="h-10 rounded-lg border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+          aria-label="Sort by model name"
+        >
+          <option value="asc">Model A–Z</option>
+          <option value="desc">Model Z–A</option>
+        </select>
+      </div>
+
+      {/* Content */}
+      {tab === "REMOVED" ? (
+        removalItems.length === 0 ? (
+          <EmptyState
+            icon="history"
+            title="No removed tyres yet"
+            description="Removed/replacement history will appear here."
+          />
+        ) : (
+          <div className="space-y-2">
+            {removalItems.map((r) => (
+              <div
+                key={r.id}
+                className="rounded-xl border border-border bg-surface p-3.5"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <p className="font-medium text-sm text-foreground">{r.tyreModel}</p>
+                  <span className="text-xs text-muted shrink-0">
+                    {new Date(r.removedAt).toLocaleDateString("en-IN", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </span>
+                </div>
+                <p className="text-xs text-muted mt-1">
+                  {r.vehicleReg} · {r.position}
+                  {r.odometer != null ? ` · ${r.odometer.toLocaleString("en-IN")} km` : ""}
+                </p>
+              </div>
+            ))}
+          </div>
+        )
+      ) : filteredModels.length === 0 ? (
+        <EmptyState icon="package" title="No tyres found" description="No tyre models match the current filters." />
       ) : (
-        <div className="space-y-3">
-          {filtered.map((t) => (
-            <div key={t.id} className="bg-white rounded-xl border border-border shadow-sm p-4">
-              <div className="flex items-start justify-between gap-3">
+        <div className="space-y-2">
+          {filteredModels.map((m) => (
+            <div
+              key={m.id}
+              className={cn(
+                "rounded-xl border p-4",
+                m.lowStock ? "border-warning/40 bg-warning-soft/40" : "border-border bg-surface"
+              )}
+            >
+              <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-semibold text-foreground">{t.internalId}</h3>
-                    <StatusBadge status={t.status} />
-                  </div>
-                  <p className="text-sm text-muted mt-0.5">
-                    {t.tyreModel.brand} {t.tyreModel.name} · {t.tyreModel.size}
+                  <p className="font-semibold text-foreground text-sm truncate">
+                    {m.brand} {m.name}
                   </p>
+                  <p className="text-xs text-muted truncate">{m.size}</p>
                 </div>
-                <button
-                  onClick={() => setStatusTarget(t)}
-                  className="p-2 rounded-lg hover:bg-muted-soft transition-colors shrink-0"
-                  aria-label={`Change status of ${t.internalId}`}
-                >
-                  <Icon name="settings-2" size={16} />
-                </button>
-              </div>
-              <div className="grid grid-cols-2 gap-2 mt-3 text-sm">
-                <InfoRow icon="calendar" label="Purchased" value={formatDate(t.purchaseDate)} />
-                <InfoRow icon="building-2" label="Vendor" value={t.vendor?.name ?? "—"} />
-                <InfoRow icon="file-text" label="Bill" value={t.purchase?.billNumber ?? "—"} />
-                <InfoRow icon="indian-rupee" label="Cost" value={formatCurrency(t.unitPrice)} />
-              </div>
-              {t.currentVehicle && t.currentPosition && (
-                <div className="mt-3 pt-3 border-t border-border text-sm">
-                  <div className="flex items-center gap-1.5 text-primary">
-                    <Icon name="truck" size={14} />
-                    <span className="font-medium">{t.currentVehicle.registrationNo}</span>
-                    <span className="text-muted">· {t.currentPosition.displayName}</span>
-                  </div>
+                <div className="text-right shrink-0">
+                  <p className="text-2xl font-bold text-foreground">{m.available}</p>
+                  <p className="text-[11px] text-muted">available</p>
                 </div>
+              </div>
+              <div className="flex items-center justify-between mt-3 text-xs text-muted">
+                <span>Total: {m.total}</span>
+                <span>Min: {m.minStockLevel}</span>
+                <span>Removed: {m.removed}</span>
+              </div>
+              {m.lowStock && (
+                <p className="mt-2 text-xs font-medium text-warning flex items-center gap-1">
+                  <Icon name="alert-triangle" size={14} />
+                  Low stock — available below minimum
+                </p>
               )}
             </div>
           ))}
         </div>
       )}
-      <Dialog
-        open={statusTarget !== null}
-        onClose={() => setStatusTarget(null)}
-        title={`Change status — ${statusTarget?.internalId ?? ""}`}
-        description="Select the new status for this tyre"
-        size="sm"
-      >
-        <div className="space-y-2">
-          {STATUS_OPTIONS.filter((s) => s !== statusTarget?.status).map((s) => (
-            <button
-              key={s}
-              onClick={() => handleStatusChange(s)}
-              disabled={statusLoading}
-              className="w-full flex items-center justify-between px-4 py-3 rounded-lg border border-border hover:bg-muted-soft transition-colors disabled:opacity-50"
+
+      {/* Adjust Inventory dialog */}
+      <Dialog open={adjustOpen} onClose={closedDialog} title="Adjust Inventory">
+        <div className="space-y-4">
+          {adjustError && (
+            <div className="rounded-lg bg-danger-soft border border-danger/20 px-3 py-2 text-sm text-danger">
+              {adjustError}
+            </div>
+          )}
+          <div>
+            <label htmlFor="adjustModel" className="block text-sm font-medium text-foreground mb-1.5">
+              Model
+            </label>
+            <select
+              id="adjustModel"
+              value={adjustModel}
+              onChange={(e) => setAdjustModel(e.target.value)}
+              className="w-full h-10 rounded-lg border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
             >
-              <span className="text-sm font-medium">{s.replace("_", " ")}</span>
-              <StatusBadge status={s} />
-            </button>
-          ))}
+              <option value="">Select model</option>
+              {models.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.brand} {m.name} {m.size} — {m.available} available
+                </option>
+              ))}
+            </select>
+          </div>
+          {adjustSelectedModel && (
+            <p className="text-sm text-muted">
+              Current available:{" "}
+              <span className="font-semibold text-foreground">{adjustSelectedModel.available}</span>
+            </p>
+          )}
+          <div>
+            <label htmlFor="adjustQty" className="block text-sm font-medium text-foreground mb-1.5">
+              Quantity to Remove
+            </label>
+            <input
+              id="adjustQty"
+              type="number"
+              min={1}
+              value={adjustQty}
+              onChange={(e) => setAdjustQty(e.target.value)}
+              placeholder="e.g. 2"
+              className="w-full h-10 rounded-lg border border-border bg-background px-3 text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/30"
+            />
+          </div>
+          <div>
+            <label htmlFor="adjustReason" className="block text-sm font-medium text-foreground mb-1.5">
+              Reason
+            </label>
+            <input
+              id="adjustReason"
+              type="text"
+              value={adjustReason}
+              onChange={(e) => setAdjustReason(e.target.value)}
+              placeholder="e.g. Given to external party"
+              className="w-full h-10 rounded-lg border border-border bg-background px-3 text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/30"
+            />
+          </div>
+          <div>
+            <label htmlFor="adjustNotes" className="block text-sm font-medium text-foreground mb-1.5">
+              Notes (optional)
+            </label>
+            <textarea
+              id="adjustNotes"
+              value={adjustNotes}
+              onChange={(e) => setAdjustNotes(e.target.value)}
+              rows={2}
+              placeholder="Optional notes"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/30"
+            />
+          </div>
+          <Button
+            className="w-full"
+            loading={pending}
+            disabled={!adjustModel || !adjustQty || !adjustReason.trim()}
+            onClick={handleAdjust}
+          >
+            Save Adjustment
+          </Button>
         </div>
       </Dialog>
     </div>
   );
 }
 
-function StatCard({ label, value, tone }: { label: string; value: number; tone: "success" | "primary" | "warning" | "muted" }) {
-  const tones = { success: "text-success", primary: "text-primary", warning: "text-warning", muted: "text-foreground" };
+function SummaryCard({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: number;
+  tone: "success" | "muted" | "primary";
+}) {
   return (
-    <div className="bg-white rounded-xl border border-border shadow-sm p-3">
-      <p className="text-xs text-muted">{label}</p>
-      <p className={`text-xl font-bold mt-0.5 ${tones[tone]}`}>{value}</p>
-    </div>
-  );
-}
-
-function FilterChip({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`shrink-0 h-8 px-3 rounded-full text-xs font-medium transition-colors ${
-        active ? "bg-primary text-white" : "bg-white border border-border text-muted hover:bg-muted-soft"
-      }`}
-    >
-      {label}
-    </button>
-  );
-}
-
-function InfoRow({ icon, label, value }: { icon: string; label: string; value: string }) {
-  return (
-    <div className="flex items-center gap-1.5 text-muted min-w-0">
-      <Icon name={icon} size={14} className="shrink-0" />
-      <span className="truncate">
-        <span className="text-muted/70">{label}: </span>
+    <div className="rounded-xl border border-border bg-surface p-3 text-center">
+      <p
+        className={cn(
+          "text-2xl font-bold",
+          tone === "success"
+            ? "text-success"
+            : tone === "primary"
+            ? "text-primary"
+            : "text-foreground"
+        )}
+      >
         {value}
-      </span>
+      </p>
+      <p className="text-[11px] text-muted mt-0.5">{label}</p>
     </div>
   );
 }

@@ -41,7 +41,7 @@ export function Drawer({
       />
       <div
         className={cn(
-          "absolute top-0 bottom-0 w-[85%] max-w-sm bg-white shadow-lg flex flex-col animate-fade-in",
+          "absolute top-0 bottom-0 w-[85%] max-w-sm bg-surface shadow-lg flex flex-col animate-fade-in",
           side === "right" ? "right-0" : "left-0"
         )}
       >
@@ -101,7 +101,7 @@ export function BottomSheet({
         onClick={onClose}
         aria-hidden="true"
       />
-      <div className="relative w-full max-h-[85vh] bg-white rounded-t-2xl shadow-lg animate-scale-in flex flex-col pb-safe">
+      <div className="relative w-full max-h-[85vh] bg-surface rounded-t-2xl shadow-lg animate-scale-in flex flex-col pb-safe">
         <div className="flex justify-center pt-3 pb-1">
           <div className="w-10 h-1 rounded-full bg-border" aria-hidden="true" />
         </div>

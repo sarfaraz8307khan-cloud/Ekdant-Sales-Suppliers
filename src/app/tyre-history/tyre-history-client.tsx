@@ -71,6 +71,7 @@ const EVENT_ICONS: Record<LifecycleEventType, string> = {
   STATUS_CHANGED: "settings-2",
   RESERVED: "circle-dot",
   UNRESERVED: "circle",
+  ADJUSTED: "package-minus",
 };
 
 const EVENT_TONES: Record<LifecycleEventType, string> = {
@@ -81,6 +82,7 @@ const EVENT_TONES: Record<LifecycleEventType, string> = {
   STATUS_CHANGED: "bg-muted-soft text-muted",
   RESERVED: "bg-info-soft text-info",
   UNRESERVED: "bg-muted-soft text-muted",
+  ADJUSTED: "bg-warning-soft text-warning",
 };
 
 export function TyreHistoryClient({
@@ -96,11 +98,7 @@ export function TyreHistoryClient({
   drivers: Driver[];
   initialTyreId?: string | null;
 }) {
-  const [tyres, setTyres] = React.useState(initialTyres);
-  // Keep client state in sync after server mutations + router.refresh()
-  React.useEffect(() => {
-    setTyres(initialTyres);
-  }, [initialTyres]);
+  const tyres = initialTyres;
   const [search, setSearch] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState<TyreStatus | "ALL">("ALL");
   const [modelFilter, setModelFilter] = React.useState<string>("ALL");
@@ -157,6 +155,7 @@ export function TyreHistoryClient({
       <PageHeader
         title="Tyre History"
         description="Complete lifecycle timeline for every tyre"
+        backHref="/"
       />
       <SearchInput
         value={search}
@@ -217,7 +216,7 @@ export function TyreHistoryClient({
             <button
               key={t.id}
               onClick={() => setSelected(t)}
-              className="w-full text-left bg-white rounded-xl border border-border shadow-sm p-4 hover:border-primary/40 transition-colors"
+              className="w-full text-left bg-surface rounded-xl border border-border shadow-sm p-4 hover:border-primary/40 transition-colors"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
@@ -346,6 +345,16 @@ function TyreDetail({ tyre }: { tyre: Tyre }) {
                         label="Reason"
                         value={inst.removalReason?.name ?? "—"}
                       />
+                      <InfoRow
+                        icon="trending-up"
+                        label="Km used"
+                        value={formatKm((inst.removalOdometer ?? 0) - inst.odometer)}
+                      />
+                      <InfoRow
+                        icon="clock"
+                        label="Days used"
+                        value={daysBetween(inst.installedAt, inst.removedAt)}
+                      />
                     </>
                   )}
                 </div>
@@ -438,7 +447,7 @@ function FilterChip({ label, active, onClick }: { label: string; active: boolean
     <button
       onClick={onClick}
       className={`shrink-0 h-8 px-3 rounded-full text-xs font-medium transition-colors ${
-        active ? "bg-primary text-white" : "bg-white border border-border text-muted hover:bg-muted-soft"
+        active ? "bg-primary text-white" : "bg-surface border border-border text-muted hover:bg-muted-soft"
       }`}
     >
       {label}
@@ -463,7 +472,7 @@ function SelectFilter({
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full h-10 px-3 rounded-lg border border-border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+        className="w-full h-10 px-3 rounded-lg border border-border bg-surface text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
       >
         <option value="ALL">All {label.toLowerCase()}s</option>
         {options.map((o) => (
@@ -474,6 +483,14 @@ function SelectFilter({
       </select>
     </label>
   );
+}
+
+function daysBetween(start: Date, end: Date): string {
+  const ms = new Date(end).getTime() - new Date(start).getTime();
+  if (ms < 0) return "—";
+  const days = Math.floor(ms / 86_400_000);
+  if (days < 1) return "0 days";
+  return `${days} day${days === 1 ? "" : "s"}`;
 }
 
 function InfoRow({ icon, label, value }: { icon: string; label: string; value: string }) {

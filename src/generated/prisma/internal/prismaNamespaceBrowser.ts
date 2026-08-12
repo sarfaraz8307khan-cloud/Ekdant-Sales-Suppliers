@@ -51,6 +51,8 @@ export const AnyNull = runtime.AnyNull
 
 
 export const ModelName = {
+  User: 'User',
+  PasswordReset: 'PasswordReset',
   ApplicationSettings: 'ApplicationSettings',
   VehicleType: 'VehicleType',
   Axle: 'Axle',
@@ -67,6 +69,8 @@ export const ModelName = {
   RemovalReason: 'RemovalReason',
   TyreLifecycleEvent: 'TyreLifecycleEvent',
   OdometerReading: 'OdometerReading',
+  Expenditure: 'Expenditure',
+  InventoryAdjustment: 'InventoryAdjustment',
   ActivityLog: 'ActivityLog'
 } as const
 
@@ -83,6 +87,33 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
 
 
+export const UserScalarFieldEnum = {
+  id: 'id',
+  loginId: 'loginId',
+  passwordHash: 'passwordHash',
+  name: 'name',
+  role: 'role',
+  status: 'status',
+  lastLoginAt: 'lastLoginAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
+export const PasswordResetScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  token: 'token',
+  expiresAt: 'expiresAt',
+  usedAt: 'usedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type PasswordResetScalarFieldEnum = (typeof PasswordResetScalarFieldEnum)[keyof typeof PasswordResetScalarFieldEnum]
+
+
 export const ApplicationSettingsScalarFieldEnum = {
   id: 'id',
   businessName: 'businessName',
@@ -91,6 +122,7 @@ export const ApplicationSettingsScalarFieldEnum = {
   dateFormat: 'dateFormat',
   tyreIdPrefix: 'tyreIdPrefix',
   tyreIdNextSeq: 'tyreIdNextSeq',
+  theme: 'theme',
   updatedAt: 'updatedAt'
 } as const
 
@@ -326,6 +358,39 @@ export const OdometerReadingScalarFieldEnum = {
 } as const
 
 export type OdometerReadingScalarFieldEnum = (typeof OdometerReadingScalarFieldEnum)[keyof typeof OdometerReadingScalarFieldEnum]
+
+
+export const ExpenditureScalarFieldEnum = {
+  id: 'id',
+  date: 'date',
+  category: 'category',
+  description: 'description',
+  vehicleId: 'vehicleId',
+  vendorId: 'vendorId',
+  quantity: 'quantity',
+  unitCost: 'unitCost',
+  tax: 'tax',
+  discount: 'discount',
+  total: 'total',
+  notes: 'notes',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ExpenditureScalarFieldEnum = (typeof ExpenditureScalarFieldEnum)[keyof typeof ExpenditureScalarFieldEnum]
+
+
+export const InventoryAdjustmentScalarFieldEnum = {
+  id: 'id',
+  tyreModelId: 'tyreModelId',
+  quantity: 'quantity',
+  reason: 'reason',
+  notes: 'notes',
+  createdAt: 'createdAt'
+} as const
+
+export type InventoryAdjustmentScalarFieldEnum = (typeof InventoryAdjustmentScalarFieldEnum)[keyof typeof InventoryAdjustmentScalarFieldEnum]
 
 
 export const ActivityLogScalarFieldEnum = {

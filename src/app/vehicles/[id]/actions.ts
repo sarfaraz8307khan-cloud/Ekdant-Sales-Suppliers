@@ -33,159 +33,6 @@ function validateOdometer(
   return null;
 }
 
-export type InstallInput = {
-  vehicleId: string;
-  positionId: string;
-  tyreId: string;
-  driverId?: string;
-  installedAt: string;
-  odometer: number;
-  notes?: string;
-  odometerOverride?: boolean;
-  odometerOverrideReason?: string;
-};
-
-export async function installTyre(input: InstallInput): Promise<ActionResult> {
-  const errors: Record<string, string> = {};
-  if (!input.vehicleId) errors.vehicleId = "Vehicle is required";
-  if (!input.positionId) errors.positionId = "Position is required";
-  if (!input.tyreId) errors.tyreId = "Tyre is required";
-  if (!input.installedAt) errors.installedAt = "Installation date is required";
-  if (input.odometer === undefined || input.odometer === null || isNaN(input.odometer)) {
-    errors.odometer = "Odometer is required";
-  }
-  if (Object.keys(errors).length > 0) return err(errors);
-
-  const installedDate = new Date(input.installedAt);
-  if (isNaN(installedDate.getTime())) return err({ installedAt: "Invalid installation date" });
-
-  try {
-    const installation = await db.$transaction(async (tx) => {
-      const tyre = await tx.tyre.findUnique({
-        where: { id: input.tyreId },
-        include: { tyreModel: { include: { compatibleVehicleTypes: true } } },
-      });
-      if (!tyre) throw new ServiceError("tyreId", "The selected tyre does not exist.");
-      if (tyre.status !== "AVAILABLE") {
-        throw new ServiceError("tyreId", `This tyre is currently ${tyre.status.replace("_", " ").toLowerCase()} and cannot be installed.`);
-      }
-      if (tyre.tyreModel.status !== "ACTIVE") {
-        throw new ServiceError("tyreId", "This tyre model is inactive and cannot be installed.");
-      }
-      if (tyre.currentInstallationId) {
-        throw new ServiceError("tyreId", "This tyre is already installed on a vehicle.");
-      }
-
-      const vehicle = await tx.vehicle.findUnique({
-        where: { id: input.vehicleId },
-        include: { vehicleType: true },
-      });
-      if (!vehicle) throw new ServiceError("vehicleId", "Vehicle not found.");
-      if (vehicle.status !== "ACTIVE") {
-        throw new ServiceError("vehicleId", "This vehicle is deactivated. Activate it before installing tyres.");
-      }
-
-      const position = await tx.tyrePosition.findUnique({ where: { id: input.positionId } });
-      if (!position || position.status !== "ACTIVE") {
-        throw new ServiceError("positionId", "The selected position is not active.");
-      }
-      if (position.vehicleTypeId !== vehicle.vehicleTypeId) {
-        throw new ServiceError("positionId", "This position does not belong to the selected vehicle's configuration.");
-      }
-
-      const existing = await tx.installation.findFirst({
-        where: { vehicleId: vehicle.id, positionId: position.id, isCurrent: true },
-      });
-      if (existing) {
-        throw new ServiceError("positionId", "This position already has a tyre installed. Replace the existing tyre instead.");
-      }
-
-      const token = tyre.tyreModel.compatibleVehicleTypes;
-      const compatible = token.length === 0 || token.some((c) => c.vehicleTypeId === vehicle.vehicleTypeId);
-      if (!compatible) {
-        throw new ServiceError("tyreId", "This tyre model is not compatible with this vehicle type.");
-      }
-
-      const odometerError = validateOdometer(input.odometer, vehicle.currentOdometer, input.odometerOverride, input.odometerOverrideReason);
-      if (odometerError) throw new ServiceError("odometer", odometerError);
-
-      const created = await tx.installation.create({
-        data: {
-          tyreId: tyre.id,
-          vehicleId: vehicle.id,
-          positionId: position.id,
-          driverId: input.driverId || null,
-          installedAt: installedDate,
-          odometer: input.odometer,
-          notes: input.notes?.trim() || null,
-          isCurrent: true,
-        },
-      });
-
-      await tx.tyre.update({
-        where: { id: tyre.id },
-        data: {
-          status: "INSTALLED",
-          currentVehicleId: vehicle.id,
-          currentPositionId: position.id,
-          currentInstallationId: created.id,
-        },
-      });
-
-      if (input.odometer !== vehicle.currentOdometer) {
-        await tx.vehicle.update({
-          where: { id: vehicle.id },
-          data: { currentOdometer: input.odometer },
-        });
-      }
-      await tx.odometerReading.create({
-        data: {
-          vehicleId: vehicle.id,
-          reading: input.odometer,
-          isOverride: input.odometerOverride === true,
-          notes:
-            input.odometerOverride === true
-              ? input.odometerOverrideReason?.trim() || "Odometer override during tyre installation"
-              : "Recorded during tyre installation",
-        },
-      });
-
-      await tx.tyreLifecycleEvent.create({
-        data: {
-          tyreId: tyre.id,
-          type: "INSTALLED",
-          description: `Installed on ${vehicle.registrationNo} at position ${position.displayName} (${input.odometer.toLocaleString("en-IN")} km)`,
-          installationId: created.id,
-          metadata: JSON.stringify({ vehicleId: vehicle.id, positionId: position.id, odometer: input.odometer }),
-        },
-      });
-
-      return { installationId: created.id, tyreInternalId: tyre.internalId, registrationNo: vehicle.registrationNo, positionName: position.displayName };
-    });
-
-    await logActivity({
-      action: "INSTALL",
-      entityType: "Installation",
-      entityId: installation.installationId,
-      description: `Tyre ${installation.tyreInternalId} installed on ${installation.registrationNo} at ${installation.positionName}`,
-      tyreId: input.tyreId,
-      vehicleId: input.vehicleId,
-      newValue: JSON.stringify({ positionId: input.positionId, odometer: input.odometer }),
-    });
-
-    revalidatePath(`/vehicles/${input.vehicleId}`);
-    revalidatePath("/vehicles");
-    revalidatePath("/inventory");
-    revalidatePath("/tyres");
-    revalidatePath("/tyre-history");
-    return { ok: true };
-  } catch (error) {
-    if (error instanceof ServiceError) return err({ [error.field]: error.message });
-    console.error("installTyre failed:", error);
-    return err({ _form: "Failed to install tyre. Please try again." });
-  }
-}
-
 export type ReplaceInput = {
   installationId: string;
   vehicleId: string;
@@ -206,6 +53,7 @@ export async function replaceTyre(input: ReplaceInput): Promise<ActionResult> {
   if (!input.installationId) errors.installationId = "Current installation is required";
   if (!input.newTyreId) errors.newTyreId = "Replacement tyre is required";
   if (!input.removedAt) errors.removedAt = "Replacement date is required";
+  if (!input.removalReasonId) errors.removalReasonId = "Replacement reason is required";
   if (input.odometer === undefined || input.odometer === null || isNaN(input.odometer)) {
     errors.odometer = "Odometer is required";
   }
@@ -213,6 +61,10 @@ export async function replaceTyre(input: ReplaceInput): Promise<ActionResult> {
 
   const removalDate = new Date(input.removedAt);
   if (isNaN(removalDate.getTime())) return err({ removedAt: "Invalid replacement date" });
+  const reason = await db.removalReason.findUnique({ where: { id: input.removalReasonId } });
+  if (!reason || reason.status !== "ACTIVE") {
+    return err({ removalReasonId: "The selected replacement reason is invalid." });
+  }
 
   try {
     const result = await db.$transaction(async (tx) => {
@@ -271,11 +123,12 @@ export async function replaceTyre(input: ReplaceInput): Promise<ActionResult> {
         },
       });
 
-      // 2. Mark the old tyre scrapped (INSTALLED → SCRAPPED per business rule)
+      // 2. Mark the old tyre removed per business rule (INSTALLED → REMOVED)
+      // Removed tyres remain reusable; scrapping is a separate disposal step.
       await tx.tyre.update({
         where: { id: current.tyreId },
         data: {
-          status: "SCRAPPED",
+          status: "REMOVED",
           currentVehicleId: null,
           currentPositionId: null,
           currentInstallationId: null,
@@ -377,116 +230,3 @@ export async function replaceTyre(input: ReplaceInput): Promise<ActionResult> {
   }
 }
 
-export type RemoveInput = {
-  installationId: string;
-  vehicleId: string;
-  tyreId: string;
-  removedAt: string;
-  odometer: number;
-  removalReasonId?: string;
-  removalNotes?: string;
-  odometerOverride?: boolean;
-  odometerOverrideReason?: string;
-};
-
-export async function removeTyre(input: RemoveInput): Promise<ActionResult> {
-  const errors: Record<string, string> = {};
-  if (!input.installationId) errors.installationId = "Current installation is required";
-  if (!input.removedAt) errors.removedAt = "Removal date is required";
-  if (input.odometer === undefined || input.odometer === null || isNaN(input.odometer)) {
-    errors.odometer = "Odometer is required";
-  }
-  if (Object.keys(errors).length > 0) return err(errors);
-
-  const removalDate = new Date(input.removedAt);
-  if (isNaN(removalDate.getTime())) return err({ removedAt: "Invalid removal date" });
-
-  try {
-    const result = await db.$transaction(async (tx) => {
-      const current = await tx.installation.findUnique({
-        where: { id: input.installationId },
-        include: { tyre: true, vehicle: true },
-      });
-      if (!current || !current.isCurrent) {
-        throw new ServiceError("installationId", "The current installation was not found or is no longer active.");
-      }
-      if (removalDate < current.installedAt) {
-        throw new ServiceError("removedAt", "Removal date cannot be before the installation date.");
-      }
-
-      const odometerError = validateOdometer(input.odometer, current.vehicle.currentOdometer, input.odometerOverride, input.odometerOverrideReason);
-      if (odometerError) throw new ServiceError("odometer", odometerError);
-
-      await tx.installation.update({
-        where: { id: current.id },
-        data: {
-          isCurrent: false,
-          removedAt: removalDate,
-          removalOdometer: input.odometer,
-          removalReasonId: input.removalReasonId || null,
-          removalNotes: input.removalNotes?.trim() || null,
-        },
-      });
-
-      await tx.tyre.update({
-        where: { id: current.tyreId },
-        data: {
-          status: "SCRAPPED",
-          currentVehicleId: null,
-          currentPositionId: null,
-          currentInstallationId: null,
-        },
-      });
-
-      await tx.tyreLifecycleEvent.create({
-        data: {
-          tyreId: current.tyreId,
-          type: "REMOVED",
-          description: `Removed from ${current.vehicle.registrationNo} (${input.odometer.toLocaleString("en-IN")} km)`,
-          installationId: current.id,
-          metadata: JSON.stringify({ odometer: input.odometer, reasonId: input.removalReasonId || null }),
-        },
-      });
-
-      if (input.odometer !== current.vehicle.currentOdometer) {
-        await tx.vehicle.update({
-          where: { id: current.vehicleId },
-          data: { currentOdometer: input.odometer },
-        });
-      }
-      await tx.odometerReading.create({
-        data: {
-          vehicleId: current.vehicleId,
-          reading: input.odometer,
-          isOverride: input.odometerOverride === true,
-          notes:
-            input.odometerOverride === true
-              ? input.odometerOverrideReason?.trim() || "Odometer override during tyre removal"
-              : "Recorded during tyre removal",
-        },
-      });
-
-      return { oldInternalId: current.tyre.internalId, registrationNo: current.vehicle.registrationNo };
-    });
-
-    await logActivity({
-      action: "REMOVE",
-      entityType: "Installation",
-      entityId: input.installationId,
-      description: `Tyre ${result.oldInternalId} removed from ${result.registrationNo}`,
-      tyreId: input.tyreId,
-      vehicleId: input.vehicleId,
-    });
-
-    revalidatePath(`/vehicles/${input.vehicleId}`);
-    revalidatePath("/vehicles");
-    revalidatePath("/inventory");
-    revalidatePath("/tyres");
-    revalidatePath("/tyre-history");
-    return { ok: true };
-  } catch (error) {
-    if (error instanceof ServiceError) return err({ [error.field]: error.message });
-    console.error("removeTyre failed:", error);
-    return err({ _form: "Failed to remove tyre. Please try again." });
-  }
-}

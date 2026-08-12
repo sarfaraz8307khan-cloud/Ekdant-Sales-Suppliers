@@ -54,13 +54,13 @@ export function Dialog({
       />
       <div
         className={cn(
-          "relative w-full bg-white rounded-t-2xl sm:rounded-2xl shadow-lg animate-scale-in",
+          "relative w-full bg-surface rounded-t-2xl sm:rounded-2xl shadow-lg animate-scale-in",
           "max-h-[90vh] overflow-y-auto",
           sizeClasses[size]
         )}
       >
         {(title || description) && (
-          <div className="flex items-start justify-between p-4 sm:p-5 border-b border-border sticky top-0 bg-white z-10">
+          <div className="flex items-start justify-between p-4 sm:p-5 border-b border-border sticky top-0 bg-surface z-10">
             <div>
               {title && <h2 className="text-base font-semibold">{title}</h2>}
               {description && (

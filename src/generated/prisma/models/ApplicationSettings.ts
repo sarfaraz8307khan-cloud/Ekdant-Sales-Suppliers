@@ -42,6 +42,7 @@ export type ApplicationSettingsMinAggregateOutputType = {
   dateFormat: string | null
   tyreIdPrefix: string | null
   tyreIdNextSeq: number | null
+  theme: $Enums.ThemePreference | null
   updatedAt: Date | null
 }
 
@@ -53,6 +54,7 @@ export type ApplicationSettingsMaxAggregateOutputType = {
   dateFormat: string | null
   tyreIdPrefix: string | null
   tyreIdNextSeq: number | null
+  theme: $Enums.ThemePreference | null
   updatedAt: Date | null
 }
 
@@ -64,6 +66,7 @@ export type ApplicationSettingsCountAggregateOutputType = {
   dateFormat: number
   tyreIdPrefix: number
   tyreIdNextSeq: number
+  theme: number
   updatedAt: number
   _all: number
 }
@@ -85,6 +88,7 @@ export type ApplicationSettingsMinAggregateInputType = {
   dateFormat?: true
   tyreIdPrefix?: true
   tyreIdNextSeq?: true
+  theme?: true
   updatedAt?: true
 }
 
@@ -96,6 +100,7 @@ export type ApplicationSettingsMaxAggregateInputType = {
   dateFormat?: true
   tyreIdPrefix?: true
   tyreIdNextSeq?: true
+  theme?: true
   updatedAt?: true
 }
 
@@ -107,6 +112,7 @@ export type ApplicationSettingsCountAggregateInputType = {
   dateFormat?: true
   tyreIdPrefix?: true
   tyreIdNextSeq?: true
+  theme?: true
   updatedAt?: true
   _all?: true
 }
@@ -205,6 +211,7 @@ export type ApplicationSettingsGroupByOutputType = {
   dateFormat: string
   tyreIdPrefix: string
   tyreIdNextSeq: number
+  theme: $Enums.ThemePreference
   updatedAt: Date
   _count: ApplicationSettingsCountAggregateOutputType | null
   _avg: ApplicationSettingsAvgAggregateOutputType | null
@@ -239,6 +246,7 @@ export type ApplicationSettingsWhereInput = {
   dateFormat?: Prisma.StringFilter<"ApplicationSettings"> | string
   tyreIdPrefix?: Prisma.StringFilter<"ApplicationSettings"> | string
   tyreIdNextSeq?: Prisma.IntFilter<"ApplicationSettings"> | number
+  theme?: Prisma.EnumThemePreferenceFilter<"ApplicationSettings"> | $Enums.ThemePreference
   updatedAt?: Prisma.DateTimeFilter<"ApplicationSettings"> | Date | string
 }
 
@@ -250,6 +258,7 @@ export type ApplicationSettingsOrderByWithRelationInput = {
   dateFormat?: Prisma.SortOrder
   tyreIdPrefix?: Prisma.SortOrder
   tyreIdNextSeq?: Prisma.SortOrder
+  theme?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
@@ -264,6 +273,7 @@ export type ApplicationSettingsWhereUniqueInput = Prisma.AtLeast<{
   dateFormat?: Prisma.StringFilter<"ApplicationSettings"> | string
   tyreIdPrefix?: Prisma.StringFilter<"ApplicationSettings"> | string
   tyreIdNextSeq?: Prisma.IntFilter<"ApplicationSettings"> | number
+  theme?: Prisma.EnumThemePreferenceFilter<"ApplicationSettings"> | $Enums.ThemePreference
   updatedAt?: Prisma.DateTimeFilter<"ApplicationSettings"> | Date | string
 }, "id">
 
@@ -275,6 +285,7 @@ export type ApplicationSettingsOrderByWithAggregationInput = {
   dateFormat?: Prisma.SortOrder
   tyreIdPrefix?: Prisma.SortOrder
   tyreIdNextSeq?: Prisma.SortOrder
+  theme?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.ApplicationSettingsCountOrderByAggregateInput
   _avg?: Prisma.ApplicationSettingsAvgOrderByAggregateInput
@@ -294,6 +305,7 @@ export type ApplicationSettingsScalarWhereWithAggregatesInput = {
   dateFormat?: Prisma.StringWithAggregatesFilter<"ApplicationSettings"> | string
   tyreIdPrefix?: Prisma.StringWithAggregatesFilter<"ApplicationSettings"> | string
   tyreIdNextSeq?: Prisma.IntWithAggregatesFilter<"ApplicationSettings"> | number
+  theme?: Prisma.EnumThemePreferenceWithAggregatesFilter<"ApplicationSettings"> | $Enums.ThemePreference
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"ApplicationSettings"> | Date | string
 }
 
@@ -305,6 +317,7 @@ export type ApplicationSettingsCreateInput = {
   dateFormat?: string
   tyreIdPrefix?: string
   tyreIdNextSeq?: number
+  theme?: $Enums.ThemePreference
   updatedAt?: Date | string
 }
 
@@ -316,6 +329,7 @@ export type ApplicationSettingsUncheckedCreateInput = {
   dateFormat?: string
   tyreIdPrefix?: string
   tyreIdNextSeq?: number
+  theme?: $Enums.ThemePreference
   updatedAt?: Date | string
 }
 
@@ -327,6 +341,7 @@ export type ApplicationSettingsUpdateInput = {
   dateFormat?: Prisma.StringFieldUpdateOperationsInput | string
   tyreIdPrefix?: Prisma.StringFieldUpdateOperationsInput | string
   tyreIdNextSeq?: Prisma.IntFieldUpdateOperationsInput | number
+  theme?: Prisma.EnumThemePreferenceFieldUpdateOperationsInput | $Enums.ThemePreference
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -338,6 +353,7 @@ export type ApplicationSettingsUncheckedUpdateInput = {
   dateFormat?: Prisma.StringFieldUpdateOperationsInput | string
   tyreIdPrefix?: Prisma.StringFieldUpdateOperationsInput | string
   tyreIdNextSeq?: Prisma.IntFieldUpdateOperationsInput | number
+  theme?: Prisma.EnumThemePreferenceFieldUpdateOperationsInput | $Enums.ThemePreference
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -349,6 +365,7 @@ export type ApplicationSettingsCreateManyInput = {
   dateFormat?: string
   tyreIdPrefix?: string
   tyreIdNextSeq?: number
+  theme?: $Enums.ThemePreference
   updatedAt?: Date | string
 }
 
@@ -360,6 +377,7 @@ export type ApplicationSettingsUpdateManyMutationInput = {
   dateFormat?: Prisma.StringFieldUpdateOperationsInput | string
   tyreIdPrefix?: Prisma.StringFieldUpdateOperationsInput | string
   tyreIdNextSeq?: Prisma.IntFieldUpdateOperationsInput | number
+  theme?: Prisma.EnumThemePreferenceFieldUpdateOperationsInput | $Enums.ThemePreference
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -371,6 +389,7 @@ export type ApplicationSettingsUncheckedUpdateManyInput = {
   dateFormat?: Prisma.StringFieldUpdateOperationsInput | string
   tyreIdPrefix?: Prisma.StringFieldUpdateOperationsInput | string
   tyreIdNextSeq?: Prisma.IntFieldUpdateOperationsInput | number
+  theme?: Prisma.EnumThemePreferenceFieldUpdateOperationsInput | $Enums.ThemePreference
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -382,6 +401,7 @@ export type ApplicationSettingsCountOrderByAggregateInput = {
   dateFormat?: Prisma.SortOrder
   tyreIdPrefix?: Prisma.SortOrder
   tyreIdNextSeq?: Prisma.SortOrder
+  theme?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
@@ -397,6 +417,7 @@ export type ApplicationSettingsMaxOrderByAggregateInput = {
   dateFormat?: Prisma.SortOrder
   tyreIdPrefix?: Prisma.SortOrder
   tyreIdNextSeq?: Prisma.SortOrder
+  theme?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
@@ -408,15 +429,12 @@ export type ApplicationSettingsMinOrderByAggregateInput = {
   dateFormat?: Prisma.SortOrder
   tyreIdPrefix?: Prisma.SortOrder
   tyreIdNextSeq?: Prisma.SortOrder
+  theme?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type ApplicationSettingsSumOrderByAggregateInput = {
   tyreIdNextSeq?: Prisma.SortOrder
-}
-
-export type StringFieldUpdateOperationsInput = {
-  set?: string
 }
 
 export type NullableStringFieldUpdateOperationsInput = {
@@ -431,8 +449,8 @@ export type IntFieldUpdateOperationsInput = {
   divide?: number
 }
 
-export type DateTimeFieldUpdateOperationsInput = {
-  set?: Date | string
+export type EnumThemePreferenceFieldUpdateOperationsInput = {
+  set?: $Enums.ThemePreference
 }
 
 
@@ -445,6 +463,7 @@ export type ApplicationSettingsSelect<ExtArgs extends runtime.Types.Extensions.I
   dateFormat?: boolean
   tyreIdPrefix?: boolean
   tyreIdNextSeq?: boolean
+  theme?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["applicationSettings"]>
 
@@ -456,6 +475,7 @@ export type ApplicationSettingsSelectCreateManyAndReturn<ExtArgs extends runtime
   dateFormat?: boolean
   tyreIdPrefix?: boolean
   tyreIdNextSeq?: boolean
+  theme?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["applicationSettings"]>
 
@@ -467,6 +487,7 @@ export type ApplicationSettingsSelectUpdateManyAndReturn<ExtArgs extends runtime
   dateFormat?: boolean
   tyreIdPrefix?: boolean
   tyreIdNextSeq?: boolean
+  theme?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["applicationSettings"]>
 
@@ -478,10 +499,11 @@ export type ApplicationSettingsSelectScalar = {
   dateFormat?: boolean
   tyreIdPrefix?: boolean
   tyreIdNextSeq?: boolean
+  theme?: boolean
   updatedAt?: boolean
 }
 
-export type ApplicationSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "businessName" | "logoPath" | "currency" | "dateFormat" | "tyreIdPrefix" | "tyreIdNextSeq" | "updatedAt", ExtArgs["result"]["applicationSettings"]>
+export type ApplicationSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "businessName" | "logoPath" | "currency" | "dateFormat" | "tyreIdPrefix" | "tyreIdNextSeq" | "theme" | "updatedAt", ExtArgs["result"]["applicationSettings"]>
 
 export type $ApplicationSettingsPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "ApplicationSettings"
@@ -494,6 +516,7 @@ export type $ApplicationSettingsPayload<ExtArgs extends runtime.Types.Extensions
     dateFormat: string
     tyreIdPrefix: string
     tyreIdNextSeq: number
+    theme: $Enums.ThemePreference
     updatedAt: Date
   }, ExtArgs["result"]["applicationSettings"]>
   composites: {}
@@ -925,6 +948,7 @@ export interface ApplicationSettingsFieldRefs {
   readonly dateFormat: Prisma.FieldRef<"ApplicationSettings", 'String'>
   readonly tyreIdPrefix: Prisma.FieldRef<"ApplicationSettings", 'String'>
   readonly tyreIdNextSeq: Prisma.FieldRef<"ApplicationSettings", 'Int'>
+  readonly theme: Prisma.FieldRef<"ApplicationSettings", 'ThemePreference'>
   readonly updatedAt: Prisma.FieldRef<"ApplicationSettings", 'DateTime'>
 }
     

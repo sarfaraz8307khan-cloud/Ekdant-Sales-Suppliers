@@ -10,7 +10,7 @@ import { BottomSheet } from "@/components/ui/drawer";
 import { EmptyState } from "@/components/ui/states";
 import { useToast } from "@/components/ui/toast";
 import { formatDate, formatNumber, formatKm } from "@/lib/format";
-import { InstallForm, ReplaceForm, RemoveForm } from "./tyre-forms";
+import { ReplaceForm } from "./tyre-forms";
 
 export type LayoutPosition = {
   id: string;
@@ -61,7 +61,7 @@ type Vehicle = {
   driver: Driver | null;
 };
 
-type Mode = "view" | "install" | "replace" | "remove";
+type Mode = "view" | "replace";
 
 export function VehicleDetailClient({
   vehicle,
@@ -80,25 +80,24 @@ export function VehicleDetailClient({
 }) {
   const router = useRouter();
   const { toast } = useToast();
+  const vehicleState = vehicle;
+  const layoutState = layout;
   const [selected, setSelected] = React.useState<LayoutPosition | null>(null);
   const [mode, setMode] = React.useState<Mode>("view");
 
-  const intent: "install" | "replace" | null =
-    action === "install" ? "install" : action === "replace" ? "replace" : null;
+  const intent: "replace" | null = action === "replace" ? "replace" : null;
 
-  // Auto-open the correct workflow when arriving with an intent
-  React.useEffect(() => {
-    if (!intent) return;
-    const target =
-      intent === "install"
-        ? layout.find((p) => !p.currentTyre)
-        : layout.find((p) => p.currentTyre);
-    if (target) {
-      setSelected(target);
-      setMode(intent);
+  // Auto-open the replacement workflow when arriving with an intent
+  // (adjust state during render — the React-recommended pattern over effects)
+  const [lastIntent, setLastIntent] = React.useState(intent);
+  if (intent !== lastIntent) {
+    setLastIntent(intent);
+    if (intent === "replace") {
+      const target = layout.find((p) => p.currentTyre);
+      setSelected(target ?? null);
+      setMode(target ? "replace" : "view");
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [intent]);
+  }
 
   const compatibleTyres = React.useMemo(() => {
     return availableTyres.filter(
@@ -129,49 +128,49 @@ export function VehicleDetailClient({
     if (formError) toast("error", formError);
   };
 
-  const installedCount = layout.filter((p) => p.currentTyre).length;
+  const installedCount = layoutState.filter((p) => p.currentTyre).length;
 
   return (
     <div>
       <PageHeader
-        title={vehicle.registrationNo}
-        description={`${vehicle.vehicleType.name} · ${vehicle.vehicleType.tyreCount} tyres`}
+        title={vehicleState.registrationNo}
+        description={`${vehicleState.vehicleType.name} · ${vehicleState.vehicleType.tyreCount} tyres`}
         backHref="/vehicles"
       />
 
       {/* Vehicle summary card */}
-      <div className="bg-white rounded-xl border border-border shadow-sm p-4 mb-4">
+      <div className="bg-surface rounded-xl border border-border shadow-sm p-4 mb-4">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h2 className="font-semibold text-foreground">{vehicle.registrationNo}</h2>
-              <StatusBadge status={vehicle.status} />
+              <h2 className="font-semibold text-foreground">{vehicleState.registrationNo}</h2>
+              <StatusBadge status={vehicleState.status} />
             </div>
             <p className="text-sm text-muted mt-1">
-              {vehicle.vehicleType.name} · {vehicle.vehicleType.tyreCount} tyres
+              {vehicleState.vehicleType.name} · {vehicleState.vehicleType.tyreCount} tyres
             </p>
             <p className="text-sm text-muted mt-0.5">
-              Odometer: {formatKm(vehicle.currentOdometer)}
+              Odometer: {formatKm(vehicleState.currentOdometer)}
             </p>
-            {vehicle.driver && (
-              <p className="text-sm text-muted mt-0.5">Driver: {vehicle.driver.name}</p>
+            {vehicleState.driver && (
+              <p className="text-sm text-muted mt-0.5">Driver: {vehicleState.driver.name}</p>
             )}
-            {vehicle.notes && (
-              <p className="text-sm text-muted mt-1">{vehicle.notes}</p>
+            {vehicleState.notes && (
+              <p className="text-sm text-muted mt-1">{vehicleState.notes}</p>
             )}
           </div>
           <div className="shrink-0 text-right">
             <p className="text-2xl font-bold text-foreground">
               {installedCount}
-              <span className="text-sm font-normal text-muted">/{vehicle.vehicleType.tyreCount}</span>
+              <span className="text-sm font-normal text-muted">/{vehicleState.vehicleType.tyreCount}</span>
             </p>
             <p className="text-xs text-muted">tyres installed</p>
           </div>
         </div>
       </div>
 
-      {vehicle.status !== "ACTIVE" && (
-        <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4 text-sm text-amber-800">
+      {vehicleState.status !== "ACTIVE" && (
+        <div className="flex items-start gap-2 bg-warning-soft border border-warning/30 rounded-lg p-3 mb-4 text-sm text-warning">
           <Icon name="alert-triangle" size={16} className="mt-0.5 shrink-0" />
           <p>
             This vehicle is deactivated. Activate it from the Vehicles page before
@@ -182,7 +181,7 @@ export function VehicleDetailClient({
 
       {/* Dynamic tyre layout */}
       <h3 className="text-sm font-semibold text-foreground mb-2">Tyre Layout</h3>
-      {layout.length === 0 ? (
+      {layoutState.length === 0 ? (
         <EmptyState
           icon="settings-2"
           title="No positions configured"
@@ -190,8 +189,8 @@ export function VehicleDetailClient({
         />
       ) : (
         <div className="space-y-4">
-          {groupByAxle(layout).map(({ axle, positions }) => (
-            <div key={axle.id} className="bg-white rounded-xl border border-border shadow-sm p-4">
+          {groupByAxle(layoutState).map(({ axle, positions }) => (
+            <div key={axle.id} className="bg-surface rounded-xl border border-border shadow-sm p-4">
               <div className="flex items-center justify-between mb-3">
                 <h4 className="text-sm font-semibold text-foreground">
                   {axle.name}
@@ -219,51 +218,18 @@ export function VehicleDetailClient({
         open={selected !== null}
         onClose={closeSheet}
         title={
-          mode === "view"
-            ? selected?.displayName
-            : mode === "install"
-              ? `Install Tyre — ${selected?.displayName}`
-              : mode === "replace"
-                ? `Replace Tyre — ${selected?.displayName}`
-                : `Remove Tyre — ${selected?.displayName}`
+          mode === "view" ? selected?.displayName : `Replace Tyre — ${selected?.displayName}`
         }
       >
         {selected && mode === "view" && (
-          <PositionView
-            position={selected}
-            vehicle={vehicle}
-            onInstall={() => setMode("install")}
-            onReplace={() => setMode("replace")}
-            onRemove={() => setMode("remove")}
-          />
-        )}
-        {selected && mode === "install" && (
-          <InstallForm
-            vehicle={vehicle}
-            position={selected}
-            tyres={compatibleTyres}
-            drivers={drivers}
-            onCancel={() => setMode("view")}
-            onSuccess={(msg) => handleSuccess(msg)}
-            onError={handleError}
-          />
+          <PositionView position={selected} vehicle={vehicleState} onReplace={() => setMode("replace")} />
         )}
         {selected && mode === "replace" && (
           <ReplaceForm
-            vehicle={vehicle}
+            vehicle={vehicleState}
             position={selected}
             tyres={compatibleTyres}
             drivers={drivers}
-            removalReasons={removalReasons}
-            onCancel={() => setMode("view")}
-            onSuccess={(msg) => handleSuccess(msg)}
-            onError={handleError}
-          />
-        )}
-        {selected && mode === "remove" && (
-          <RemoveForm
-            vehicle={vehicle}
-            position={selected}
             removalReasons={removalReasons}
             onCancel={() => setMode("view")}
             onSuccess={(msg) => handleSuccess(msg)}
@@ -337,15 +303,11 @@ function PositionCard({
 function PositionView({
   position,
   vehicle,
-  onInstall,
   onReplace,
-  onRemove,
 }: {
   position: LayoutPosition;
   vehicle: Vehicle;
-  onInstall: () => void;
   onReplace: () => void;
-  onRemove: () => void;
 }) {
   const tyre = position.currentTyre;
   const inst = tyre?.currentInstallation;
@@ -364,7 +326,7 @@ function PositionView({
 
       {tyre && inst ? (
         <div className="space-y-3">
-          <div className="bg-white border border-border rounded-lg p-3">
+          <div className="bg-surface border border-border rounded-lg p-3">
             <p className="text-xs text-muted">Current Tyre</p>
             <p className="text-base font-semibold text-foreground">{tyre.internalId}</p>
             <p className="text-sm text-muted">
@@ -372,41 +334,29 @@ function PositionView({
             </p>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-white border border-border rounded-lg p-3">
+            <div className="bg-surface border border-border rounded-lg p-3">
               <p className="text-xs text-muted">Installed</p>
               <p className="text-sm font-medium text-foreground">{formatDate(inst.installedAt)}</p>
             </div>
-            <div className="bg-white border border-border rounded-lg p-3">
+            <div className="bg-surface border border-border rounded-lg p-3">
               <p className="text-xs text-muted">Odometer</p>
               <p className="text-sm font-medium text-foreground">{formatNumber(inst.odometer)} km</p>
             </div>
           </div>
           {inst.driver && (
-            <div className="bg-white border border-border rounded-lg p-3">
+            <div className="bg-surface border border-border rounded-lg p-3">
               <p className="text-xs text-muted">Driver</p>
               <p className="text-sm font-medium text-foreground">{inst.driver.name}</p>
             </div>
           )}
-          <div className="space-y-2 pt-1">
-            <Button className="w-full" onClick={onReplace} disabled={vehicle.status !== "ACTIVE"}>
-              <Icon name="refresh-cw" size={16} />
-              Replace Tyre
-            </Button>
-            <Button variant="outline" className="w-full" onClick={onRemove} disabled={vehicle.status !== "ACTIVE"}>
-              <Icon name="x-circle" size={16} />
-              Remove Tyre
-            </Button>
-          </div>
+          <Button className="w-full" onClick={onReplace} disabled={vehicle.status !== "ACTIVE"}>
+            <Icon name="refresh-cw" size={16} />
+            Replace Tyre
+          </Button>
         </div>
       ) : (
-        <div className="space-y-3">
-          <div className="bg-muted-soft/50 rounded-lg p-3 text-sm text-muted">
-            This position is currently empty.
-          </div>
-          <Button className="w-full" onClick={onInstall} disabled={vehicle.status !== "ACTIVE"}>
-            <Icon name="plus" size={16} />
-            Install Tyre
-          </Button>
+        <div className="bg-muted-soft/50 rounded-lg p-3 text-sm text-muted">
+          This position is currently empty. Use the Replace Tyre workflow to fit a tyre.
         </div>
       )}
     </div>

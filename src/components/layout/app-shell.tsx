@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { primaryNav, secondaryNav, mobileBottomNav } from "@/lib/navigation";
 import { Icon } from "@/components/ui/icon";
 import { BottomSheet } from "@/components/ui/drawer";
+import { logout } from "@/app/(auth)/actions";
 
 function CompanyBrand({
   businessName,
@@ -82,7 +83,7 @@ export function AppShell({
   return (
     <div className="min-h-screen">
       {/* Desktop sidebar */}
-      <aside className="hidden lg:flex fixed inset-y-0 left-0 w-64 flex-col border-r border-border bg-white z-30">
+      <aside className="hidden lg:flex fixed inset-y-0 left-0 w-64 flex-col border-r border-border bg-background z-30">
         <div className="p-4 border-b border-border">
           <CompanyBrand businessName={businessName} logoPath={logoPath} />
         </div>
@@ -100,13 +101,22 @@ export function AppShell({
             <NavLink key={item.href} item={item} active={isActive(item.href)} />
           ))}
         </nav>
-        <div className="p-4 border-t border-border">
+        <div className="p-4 border-t border-border space-y-2">
+          <form action={logout}>
+            <button
+              type="submit"
+              className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-sm font-medium text-danger hover:bg-danger-soft transition-colors"
+            >
+              <Icon name="x-circle" size={18} />
+              Logout
+            </button>
+          </form>
           <p className="text-[11px] text-muted">© {new Date().getFullYear()}</p>
         </div>
       </aside>
 
       {/* Mobile header */}
-      <header className="lg:hidden sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-border">
+      <header className="lg:hidden sticky top-0 z-30 bg-background/90 backdrop-blur border-b border-border">
         <div className="px-4 h-14 flex items-center justify-between">
           <CompanyBrand businessName={businessName} logoPath={logoPath} />
           <Link
@@ -128,7 +138,7 @@ export function AppShell({
 
       {/* Mobile bottom nav */}
       <nav
-        className="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-white border-t border-border pb-safe"
+        className="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-background border-t border-border pb-safe"
         aria-label="Primary"
       >
         <div className="grid grid-cols-5 h-16">
@@ -175,6 +185,15 @@ export function AppShell({
               onClick={() => setMoreOpen(false)}
             />
           ))}
+          <form action={logout} className="pt-2 border-t border-border">
+            <button
+              type="submit"
+              className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-danger hover:bg-danger-soft transition-colors"
+            >
+              <Icon name="x-circle" size={18} />
+              Logout
+            </button>
+          </form>
         </div>
       </BottomSheet>
     </div>

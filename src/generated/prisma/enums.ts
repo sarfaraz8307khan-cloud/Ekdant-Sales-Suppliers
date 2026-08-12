@@ -58,7 +58,26 @@ export const LifecycleEventType = {
   REPLACED: 'REPLACED',
   STATUS_CHANGED: 'STATUS_CHANGED',
   RESERVED: 'RESERVED',
-  UNRESERVED: 'UNRESERVED'
+  UNRESERVED: 'UNRESERVED',
+  ADJUSTED: 'ADJUSTED'
 } as const
 
 export type LifecycleEventType = (typeof LifecycleEventType)[keyof typeof LifecycleEventType]
+
+
+export const UserRole = {
+  ADMIN: 'ADMIN',
+  MANAGER: 'MANAGER',
+  VIEWER: 'VIEWER'
+} as const
+
+export type UserRole = (typeof UserRole)[keyof typeof UserRole]
+
+
+export const ThemePreference = {
+  LIGHT: 'LIGHT',
+  DARK: 'DARK',
+  SYSTEM: 'SYSTEM'
+} as const
+
+export type ThemePreference = (typeof ThemePreference)[keyof typeof ThemePreference]

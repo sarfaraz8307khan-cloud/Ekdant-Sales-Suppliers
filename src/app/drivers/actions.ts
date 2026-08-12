@@ -91,6 +91,45 @@ export async function updateDriver(id: string, data: DriverFormData) {
   }
 }
 
+export async function deleteDriver(id: string) {
+  try {
+    const driver = await db.driver.findUnique({
+      where: { id },
+      include: {
+        vehicles: { select: { id: true } },
+        installations: { select: { id: true } },
+      },
+    });
+    if (!driver) return { ok: false, errors: { _form: "Driver not found." } };
+
+    if (driver.vehicles.length > 0 || driver.installations.length > 0) {
+      return {
+        ok: false,
+        errors: {
+          _form:
+            "This driver is linked to vehicles or installation history and cannot be permanently deleted. Deactivate it instead.",
+        },
+      };
+    }
+
+    await db.driver.delete({ where: { id } });
+
+    await logActivity({
+      action: "DELETE",
+      entityType: "Driver",
+      entityId: id,
+      description: `Driver "${driver.name}" deleted`,
+      previousValue: driver.name,
+    });
+
+    revalidatePath("/drivers");
+    return { ok: true };
+  } catch (error) {
+    console.error("deleteDriver failed:", error);
+    return { ok: false, errors: { _form: "Unable to delete this driver. Please try again." } };
+  }
+}
+
 export async function setDriverStatus(id: string, status: "ACTIVE" | "INACTIVE") {
   try {
     const driver = await db.driver.update({

@@ -251,6 +251,7 @@ export type TyreModelWhereInput = {
   compatibleVehicleTypes?: Prisma.TyreModelVehicleTypeListRelationFilter
   tyres?: Prisma.TyreListRelationFilter
   purchaseItems?: Prisma.PurchaseItemListRelationFilter
+  inventoryAdjustments?: Prisma.InventoryAdjustmentListRelationFilter
 }
 
 export type TyreModelOrderByWithRelationInput = {
@@ -266,6 +267,7 @@ export type TyreModelOrderByWithRelationInput = {
   compatibleVehicleTypes?: Prisma.TyreModelVehicleTypeOrderByRelationAggregateInput
   tyres?: Prisma.TyreOrderByRelationAggregateInput
   purchaseItems?: Prisma.PurchaseItemOrderByRelationAggregateInput
+  inventoryAdjustments?: Prisma.InventoryAdjustmentOrderByRelationAggregateInput
 }
 
 export type TyreModelWhereUniqueInput = Prisma.AtLeast<{
@@ -285,6 +287,7 @@ export type TyreModelWhereUniqueInput = Prisma.AtLeast<{
   compatibleVehicleTypes?: Prisma.TyreModelVehicleTypeListRelationFilter
   tyres?: Prisma.TyreListRelationFilter
   purchaseItems?: Prisma.PurchaseItemListRelationFilter
+  inventoryAdjustments?: Prisma.InventoryAdjustmentListRelationFilter
 }, "id" | "brand_name_size">
 
 export type TyreModelOrderByWithAggregationInput = {
@@ -332,6 +335,7 @@ export type TyreModelCreateInput = {
   compatibleVehicleTypes?: Prisma.TyreModelVehicleTypeCreateNestedManyWithoutTyreModelInput
   tyres?: Prisma.TyreCreateNestedManyWithoutTyreModelInput
   purchaseItems?: Prisma.PurchaseItemCreateNestedManyWithoutTyreModelInput
+  inventoryAdjustments?: Prisma.InventoryAdjustmentCreateNestedManyWithoutTyreModelInput
 }
 
 export type TyreModelUncheckedCreateInput = {
@@ -347,6 +351,7 @@ export type TyreModelUncheckedCreateInput = {
   compatibleVehicleTypes?: Prisma.TyreModelVehicleTypeUncheckedCreateNestedManyWithoutTyreModelInput
   tyres?: Prisma.TyreUncheckedCreateNestedManyWithoutTyreModelInput
   purchaseItems?: Prisma.PurchaseItemUncheckedCreateNestedManyWithoutTyreModelInput
+  inventoryAdjustments?: Prisma.InventoryAdjustmentUncheckedCreateNestedManyWithoutTyreModelInput
 }
 
 export type TyreModelUpdateInput = {
@@ -362,6 +367,7 @@ export type TyreModelUpdateInput = {
   compatibleVehicleTypes?: Prisma.TyreModelVehicleTypeUpdateManyWithoutTyreModelNestedInput
   tyres?: Prisma.TyreUpdateManyWithoutTyreModelNestedInput
   purchaseItems?: Prisma.PurchaseItemUpdateManyWithoutTyreModelNestedInput
+  inventoryAdjustments?: Prisma.InventoryAdjustmentUpdateManyWithoutTyreModelNestedInput
 }
 
 export type TyreModelUncheckedUpdateInput = {
@@ -377,6 +383,7 @@ export type TyreModelUncheckedUpdateInput = {
   compatibleVehicleTypes?: Prisma.TyreModelVehicleTypeUncheckedUpdateManyWithoutTyreModelNestedInput
   tyres?: Prisma.TyreUncheckedUpdateManyWithoutTyreModelNestedInput
   purchaseItems?: Prisma.PurchaseItemUncheckedUpdateManyWithoutTyreModelNestedInput
+  inventoryAdjustments?: Prisma.InventoryAdjustmentUncheckedUpdateManyWithoutTyreModelNestedInput
 }
 
 export type TyreModelCreateManyInput = {
@@ -512,6 +519,20 @@ export type TyreModelUpdateOneRequiredWithoutTyresNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.TyreModelUpdateToOneWithWhereWithoutTyresInput, Prisma.TyreModelUpdateWithoutTyresInput>, Prisma.TyreModelUncheckedUpdateWithoutTyresInput>
 }
 
+export type TyreModelCreateNestedOneWithoutInventoryAdjustmentsInput = {
+  create?: Prisma.XOR<Prisma.TyreModelCreateWithoutInventoryAdjustmentsInput, Prisma.TyreModelUncheckedCreateWithoutInventoryAdjustmentsInput>
+  connectOrCreate?: Prisma.TyreModelCreateOrConnectWithoutInventoryAdjustmentsInput
+  connect?: Prisma.TyreModelWhereUniqueInput
+}
+
+export type TyreModelUpdateOneRequiredWithoutInventoryAdjustmentsNestedInput = {
+  create?: Prisma.XOR<Prisma.TyreModelCreateWithoutInventoryAdjustmentsInput, Prisma.TyreModelUncheckedCreateWithoutInventoryAdjustmentsInput>
+  connectOrCreate?: Prisma.TyreModelCreateOrConnectWithoutInventoryAdjustmentsInput
+  upsert?: Prisma.TyreModelUpsertWithoutInventoryAdjustmentsInput
+  connect?: Prisma.TyreModelWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TyreModelUpdateToOneWithWhereWithoutInventoryAdjustmentsInput, Prisma.TyreModelUpdateWithoutInventoryAdjustmentsInput>, Prisma.TyreModelUncheckedUpdateWithoutInventoryAdjustmentsInput>
+}
+
 export type TyreModelCreateWithoutCompatibleVehicleTypesInput = {
   id?: string
   brand: string
@@ -524,6 +545,7 @@ export type TyreModelCreateWithoutCompatibleVehicleTypesInput = {
   updatedAt?: Date | string
   tyres?: Prisma.TyreCreateNestedManyWithoutTyreModelInput
   purchaseItems?: Prisma.PurchaseItemCreateNestedManyWithoutTyreModelInput
+  inventoryAdjustments?: Prisma.InventoryAdjustmentCreateNestedManyWithoutTyreModelInput
 }
 
 export type TyreModelUncheckedCreateWithoutCompatibleVehicleTypesInput = {
@@ -538,6 +560,7 @@ export type TyreModelUncheckedCreateWithoutCompatibleVehicleTypesInput = {
   updatedAt?: Date | string
   tyres?: Prisma.TyreUncheckedCreateNestedManyWithoutTyreModelInput
   purchaseItems?: Prisma.PurchaseItemUncheckedCreateNestedManyWithoutTyreModelInput
+  inventoryAdjustments?: Prisma.InventoryAdjustmentUncheckedCreateNestedManyWithoutTyreModelInput
 }
 
 export type TyreModelCreateOrConnectWithoutCompatibleVehicleTypesInput = {
@@ -568,6 +591,7 @@ export type TyreModelUpdateWithoutCompatibleVehicleTypesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tyres?: Prisma.TyreUpdateManyWithoutTyreModelNestedInput
   purchaseItems?: Prisma.PurchaseItemUpdateManyWithoutTyreModelNestedInput
+  inventoryAdjustments?: Prisma.InventoryAdjustmentUpdateManyWithoutTyreModelNestedInput
 }
 
 export type TyreModelUncheckedUpdateWithoutCompatibleVehicleTypesInput = {
@@ -582,6 +606,7 @@ export type TyreModelUncheckedUpdateWithoutCompatibleVehicleTypesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tyres?: Prisma.TyreUncheckedUpdateManyWithoutTyreModelNestedInput
   purchaseItems?: Prisma.PurchaseItemUncheckedUpdateManyWithoutTyreModelNestedInput
+  inventoryAdjustments?: Prisma.InventoryAdjustmentUncheckedUpdateManyWithoutTyreModelNestedInput
 }
 
 export type TyreModelCreateWithoutPurchaseItemsInput = {
@@ -596,6 +621,7 @@ export type TyreModelCreateWithoutPurchaseItemsInput = {
   updatedAt?: Date | string
   compatibleVehicleTypes?: Prisma.TyreModelVehicleTypeCreateNestedManyWithoutTyreModelInput
   tyres?: Prisma.TyreCreateNestedManyWithoutTyreModelInput
+  inventoryAdjustments?: Prisma.InventoryAdjustmentCreateNestedManyWithoutTyreModelInput
 }
 
 export type TyreModelUncheckedCreateWithoutPurchaseItemsInput = {
@@ -610,6 +636,7 @@ export type TyreModelUncheckedCreateWithoutPurchaseItemsInput = {
   updatedAt?: Date | string
   compatibleVehicleTypes?: Prisma.TyreModelVehicleTypeUncheckedCreateNestedManyWithoutTyreModelInput
   tyres?: Prisma.TyreUncheckedCreateNestedManyWithoutTyreModelInput
+  inventoryAdjustments?: Prisma.InventoryAdjustmentUncheckedCreateNestedManyWithoutTyreModelInput
 }
 
 export type TyreModelCreateOrConnectWithoutPurchaseItemsInput = {
@@ -640,6 +667,7 @@ export type TyreModelUpdateWithoutPurchaseItemsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   compatibleVehicleTypes?: Prisma.TyreModelVehicleTypeUpdateManyWithoutTyreModelNestedInput
   tyres?: Prisma.TyreUpdateManyWithoutTyreModelNestedInput
+  inventoryAdjustments?: Prisma.InventoryAdjustmentUpdateManyWithoutTyreModelNestedInput
 }
 
 export type TyreModelUncheckedUpdateWithoutPurchaseItemsInput = {
@@ -654,6 +682,7 @@ export type TyreModelUncheckedUpdateWithoutPurchaseItemsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   compatibleVehicleTypes?: Prisma.TyreModelVehicleTypeUncheckedUpdateManyWithoutTyreModelNestedInput
   tyres?: Prisma.TyreUncheckedUpdateManyWithoutTyreModelNestedInput
+  inventoryAdjustments?: Prisma.InventoryAdjustmentUncheckedUpdateManyWithoutTyreModelNestedInput
 }
 
 export type TyreModelCreateWithoutTyresInput = {
@@ -668,6 +697,7 @@ export type TyreModelCreateWithoutTyresInput = {
   updatedAt?: Date | string
   compatibleVehicleTypes?: Prisma.TyreModelVehicleTypeCreateNestedManyWithoutTyreModelInput
   purchaseItems?: Prisma.PurchaseItemCreateNestedManyWithoutTyreModelInput
+  inventoryAdjustments?: Prisma.InventoryAdjustmentCreateNestedManyWithoutTyreModelInput
 }
 
 export type TyreModelUncheckedCreateWithoutTyresInput = {
@@ -682,6 +712,7 @@ export type TyreModelUncheckedCreateWithoutTyresInput = {
   updatedAt?: Date | string
   compatibleVehicleTypes?: Prisma.TyreModelVehicleTypeUncheckedCreateNestedManyWithoutTyreModelInput
   purchaseItems?: Prisma.PurchaseItemUncheckedCreateNestedManyWithoutTyreModelInput
+  inventoryAdjustments?: Prisma.InventoryAdjustmentUncheckedCreateNestedManyWithoutTyreModelInput
 }
 
 export type TyreModelCreateOrConnectWithoutTyresInput = {
@@ -712,6 +743,7 @@ export type TyreModelUpdateWithoutTyresInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   compatibleVehicleTypes?: Prisma.TyreModelVehicleTypeUpdateManyWithoutTyreModelNestedInput
   purchaseItems?: Prisma.PurchaseItemUpdateManyWithoutTyreModelNestedInput
+  inventoryAdjustments?: Prisma.InventoryAdjustmentUpdateManyWithoutTyreModelNestedInput
 }
 
 export type TyreModelUncheckedUpdateWithoutTyresInput = {
@@ -726,6 +758,83 @@ export type TyreModelUncheckedUpdateWithoutTyresInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   compatibleVehicleTypes?: Prisma.TyreModelVehicleTypeUncheckedUpdateManyWithoutTyreModelNestedInput
   purchaseItems?: Prisma.PurchaseItemUncheckedUpdateManyWithoutTyreModelNestedInput
+  inventoryAdjustments?: Prisma.InventoryAdjustmentUncheckedUpdateManyWithoutTyreModelNestedInput
+}
+
+export type TyreModelCreateWithoutInventoryAdjustmentsInput = {
+  id?: string
+  brand: string
+  name: string
+  size: string
+  description?: string | null
+  minStockLevel?: number
+  status?: $Enums.EntityStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  compatibleVehicleTypes?: Prisma.TyreModelVehicleTypeCreateNestedManyWithoutTyreModelInput
+  tyres?: Prisma.TyreCreateNestedManyWithoutTyreModelInput
+  purchaseItems?: Prisma.PurchaseItemCreateNestedManyWithoutTyreModelInput
+}
+
+export type TyreModelUncheckedCreateWithoutInventoryAdjustmentsInput = {
+  id?: string
+  brand: string
+  name: string
+  size: string
+  description?: string | null
+  minStockLevel?: number
+  status?: $Enums.EntityStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  compatibleVehicleTypes?: Prisma.TyreModelVehicleTypeUncheckedCreateNestedManyWithoutTyreModelInput
+  tyres?: Prisma.TyreUncheckedCreateNestedManyWithoutTyreModelInput
+  purchaseItems?: Prisma.PurchaseItemUncheckedCreateNestedManyWithoutTyreModelInput
+}
+
+export type TyreModelCreateOrConnectWithoutInventoryAdjustmentsInput = {
+  where: Prisma.TyreModelWhereUniqueInput
+  create: Prisma.XOR<Prisma.TyreModelCreateWithoutInventoryAdjustmentsInput, Prisma.TyreModelUncheckedCreateWithoutInventoryAdjustmentsInput>
+}
+
+export type TyreModelUpsertWithoutInventoryAdjustmentsInput = {
+  update: Prisma.XOR<Prisma.TyreModelUpdateWithoutInventoryAdjustmentsInput, Prisma.TyreModelUncheckedUpdateWithoutInventoryAdjustmentsInput>
+  create: Prisma.XOR<Prisma.TyreModelCreateWithoutInventoryAdjustmentsInput, Prisma.TyreModelUncheckedCreateWithoutInventoryAdjustmentsInput>
+  where?: Prisma.TyreModelWhereInput
+}
+
+export type TyreModelUpdateToOneWithWhereWithoutInventoryAdjustmentsInput = {
+  where?: Prisma.TyreModelWhereInput
+  data: Prisma.XOR<Prisma.TyreModelUpdateWithoutInventoryAdjustmentsInput, Prisma.TyreModelUncheckedUpdateWithoutInventoryAdjustmentsInput>
+}
+
+export type TyreModelUpdateWithoutInventoryAdjustmentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  brand?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  size?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  minStockLevel?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  compatibleVehicleTypes?: Prisma.TyreModelVehicleTypeUpdateManyWithoutTyreModelNestedInput
+  tyres?: Prisma.TyreUpdateManyWithoutTyreModelNestedInput
+  purchaseItems?: Prisma.PurchaseItemUpdateManyWithoutTyreModelNestedInput
+}
+
+export type TyreModelUncheckedUpdateWithoutInventoryAdjustmentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  brand?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  size?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  minStockLevel?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  compatibleVehicleTypes?: Prisma.TyreModelVehicleTypeUncheckedUpdateManyWithoutTyreModelNestedInput
+  tyres?: Prisma.TyreUncheckedUpdateManyWithoutTyreModelNestedInput
+  purchaseItems?: Prisma.PurchaseItemUncheckedUpdateManyWithoutTyreModelNestedInput
 }
 
 
@@ -737,12 +846,14 @@ export type TyreModelCountOutputType = {
   compatibleVehicleTypes: number
   tyres: number
   purchaseItems: number
+  inventoryAdjustments: number
 }
 
 export type TyreModelCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   compatibleVehicleTypes?: boolean | TyreModelCountOutputTypeCountCompatibleVehicleTypesArgs
   tyres?: boolean | TyreModelCountOutputTypeCountTyresArgs
   purchaseItems?: boolean | TyreModelCountOutputTypeCountPurchaseItemsArgs
+  inventoryAdjustments?: boolean | TyreModelCountOutputTypeCountInventoryAdjustmentsArgs
 }
 
 /**
@@ -776,6 +887,13 @@ export type TyreModelCountOutputTypeCountPurchaseItemsArgs<ExtArgs extends runti
   where?: Prisma.PurchaseItemWhereInput
 }
 
+/**
+ * TyreModelCountOutputType without action
+ */
+export type TyreModelCountOutputTypeCountInventoryAdjustmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.InventoryAdjustmentWhereInput
+}
+
 
 export type TyreModelSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -790,6 +908,7 @@ export type TyreModelSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   compatibleVehicleTypes?: boolean | Prisma.TyreModel$compatibleVehicleTypesArgs<ExtArgs>
   tyres?: boolean | Prisma.TyreModel$tyresArgs<ExtArgs>
   purchaseItems?: boolean | Prisma.TyreModel$purchaseItemsArgs<ExtArgs>
+  inventoryAdjustments?: boolean | Prisma.TyreModel$inventoryAdjustmentsArgs<ExtArgs>
   _count?: boolean | Prisma.TyreModelCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["tyreModel"]>
 
@@ -834,6 +953,7 @@ export type TyreModelInclude<ExtArgs extends runtime.Types.Extensions.InternalAr
   compatibleVehicleTypes?: boolean | Prisma.TyreModel$compatibleVehicleTypesArgs<ExtArgs>
   tyres?: boolean | Prisma.TyreModel$tyresArgs<ExtArgs>
   purchaseItems?: boolean | Prisma.TyreModel$purchaseItemsArgs<ExtArgs>
+  inventoryAdjustments?: boolean | Prisma.TyreModel$inventoryAdjustmentsArgs<ExtArgs>
   _count?: boolean | Prisma.TyreModelCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type TyreModelIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -845,6 +965,7 @@ export type $TyreModelPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     compatibleVehicleTypes: Prisma.$TyreModelVehicleTypePayload<ExtArgs>[]
     tyres: Prisma.$TyrePayload<ExtArgs>[]
     purchaseItems: Prisma.$PurchaseItemPayload<ExtArgs>[]
+    inventoryAdjustments: Prisma.$InventoryAdjustmentPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1253,6 +1374,7 @@ export interface Prisma__TyreModelClient<T, Null = never, ExtArgs extends runtim
   compatibleVehicleTypes<T extends Prisma.TyreModel$compatibleVehicleTypesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TyreModel$compatibleVehicleTypesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TyreModelVehicleTypePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   tyres<T extends Prisma.TyreModel$tyresArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TyreModel$tyresArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TyrePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   purchaseItems<T extends Prisma.TyreModel$purchaseItemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TyreModel$purchaseItemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PurchaseItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  inventoryAdjustments<T extends Prisma.TyreModel$inventoryAdjustmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TyreModel$inventoryAdjustmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InventoryAdjustmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1751,6 +1873,30 @@ export type TyreModel$purchaseItemsArgs<ExtArgs extends runtime.Types.Extensions
   take?: number
   skip?: number
   distinct?: Prisma.PurchaseItemScalarFieldEnum | Prisma.PurchaseItemScalarFieldEnum[]
+}
+
+/**
+ * TyreModel.inventoryAdjustments
+ */
+export type TyreModel$inventoryAdjustmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the InventoryAdjustment
+   */
+  select?: Prisma.InventoryAdjustmentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the InventoryAdjustment
+   */
+  omit?: Prisma.InventoryAdjustmentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.InventoryAdjustmentInclude<ExtArgs> | null
+  where?: Prisma.InventoryAdjustmentWhereInput
+  orderBy?: Prisma.InventoryAdjustmentOrderByWithRelationInput | Prisma.InventoryAdjustmentOrderByWithRelationInput[]
+  cursor?: Prisma.InventoryAdjustmentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.InventoryAdjustmentScalarFieldEnum | Prisma.InventoryAdjustmentScalarFieldEnum[]
 }
 
 /**

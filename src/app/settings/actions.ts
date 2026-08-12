@@ -3,6 +3,26 @@
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 
+export async function updateTheme(theme: "LIGHT" | "DARK" | "SYSTEM") {
+  try {
+    let settings = await db.applicationSettings.findFirst();
+    if (!settings) {
+      settings = await db.applicationSettings.create({
+        data: { theme },
+      });
+    } else {
+      await db.applicationSettings.update({
+        where: { id: settings.id },
+        data: { theme },
+      });
+    }
+    revalidatePath("/settings");
+    return { ok: true as const };
+  } catch {
+    return { ok: false as const, error: "Unable to update theme." };
+  }
+}
+
 export type CompanyProfileInput = {
   businessName: string;
   logoDataUrl?: string | null;

@@ -1,32 +1,78 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ============================================================
+   EKDANT DESIGN SYSTEM — semantic tokens
+   Use these tokens everywhere; never hard-code palette colors.
+   ============================================================ */
 :root {
-  --background: #f8fafc;
+  /* Surfaces */
+  --background: #f6f7fb;
+  --surface: #ffffff;
+  --surface-elevated: #ffffff;
   --foreground: #0f172a;
+  --muted: #5b6478;
+  --muted-soft: #eef1f6;
+  --border: #e3e7ef;
+
+  /* Brand */
   --primary: #4f46e5;
   --primary-hover: #4338ca;
-  --primary-soft: #eef2ff;
-  --border: #e2e8f0;
-  --muted: #64748b;
-  --muted-soft: #f1f5f9;
-  --success: #16a34a;
-  --success-soft: #f0fdf4;
+  --primary-soft: #eef0ff;
+
+  /* Feedback */
+  --success: #059669;
+  --success-soft: #ecfdf5;
   --warning: #d97706;
-  --warning-soft: #fffbeb;
+  --warning-soft: #fff7e6;
   --danger: #dc2626;
   --danger-soft: #fef2f2;
   --info: #0284c7;
   --info-soft: #f0f9ff;
+
+  /* Elevation */
   --radius: 0.75rem;
   --radius-lg: 1rem;
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-sm: 0 1px 2px 0 rgb(15 23 42 / 0.05), 0 1px 3px 0 rgb(15 23 42 / 0.06);
+  --shadow: 0 1px 3px 0 rgb(15 23 42 / 0.08), 0 2px 6px -1px rgb(15 23 42 / 0.06);
+  --shadow-md: 0 6px 16px -4px rgb(15 23 42 / 0.12), 0 2px 6px -2px rgb(15 23 42 / 0.08);
+  --shadow-lg: 0 16px 32px -8px rgb(15 23 42 / 0.18), 0 6px 16px -6px rgb(15 23 42 / 0.1);
+}
+
+.dark {
+  /* Deep graphite surfaces with light readable text */
+  --background: #0b0d12;
+  --surface: #141720;
+  --surface-elevated: #1b1f2a;
+  --foreground: #f8fafc;
+  --muted: #aab2c0;
+  --muted-soft: #1a1f2a;
+  --border: #2a3040;
+
+  --primary: #818cf8;
+  --primary-hover: #6366f1;
+  --primary-soft: #232a4d;
+
+  --success: #34d399;
+  --success-soft: #0b2a20;
+  --warning: #fbbf24;
+  --warning-soft: #33240a;
+  --danger: #f87171;
+  --danger-soft: #3b1212;
+  --info: #38bdf8;
+  --info-soft: #0c2a3a;
+
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.35);
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.4), 0 2px 6px -1px rgb(0 0 0 / 0.3);
+  --shadow-md: 0 6px 16px -4px rgb(0 0 0 / 0.5), 0 2px 6px -2px rgb(0 0 0 / 0.4);
+  --shadow-lg: 0 16px 32px -8px rgb(0 0 0 / 0.6), 0 6px 16px -6px rgb(0 0 0 / 0.45);
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-elevated: var(--surface-elevated);
   --color-foreground: var(--foreground);
   --color-primary: var(--primary);
   --color-primary-hover: var(--primary-hover);
@@ -60,14 +106,70 @@ html {
   height: 100%;
 }
 
+/* ============================================================
+   APPLICATION BACKGROUND — subtle indigo/violet glow,
+   faint geometric wheel motif and tyre-tread texture.
+   Content always stays the visual priority.
+   ============================================================ */
 body {
-  background: var(--background);
+  background-color: var(--background);
+  background-image:
+    radial-gradient(56rem 56rem at 108% -12%, color-mix(in srgb, var(--primary) 7%, transparent) 0%, transparent 60%),
+    radial-gradient(44rem 44rem at -14% 112%, color-mix(in srgb, #7c3aed 6%, transparent) 0%, transparent 60%),
+    radial-gradient(30rem 30rem at 50% -20%, color-mix(in srgb, var(--primary) 4%, transparent) 0%, transparent 70%);
+  background-attachment: fixed;
   color: var(--foreground);
   font-family: var(--font-sans);
   min-height: 100%;
   overflow-x: clip;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* Faint tyre-tread texture */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.5;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent 0 26px,
+    color-mix(in srgb, var(--foreground) 1.6%, transparent) 26px 28px,
+    transparent 28px 52px,
+    color-mix(in srgb, var(--foreground) 1.1%, transparent) 52px 53px
+  );
+  mask-image: radial-gradient(80% 80% at 50% 30%, black, transparent 90%);
+}
+
+/* Subtle wheel ring motif in the corner */
+body::after {
+  content: "";
+  position: fixed;
+  width: 34rem;
+  height: 34rem;
+  border-radius: 9999px;
+  right: -14rem;
+  bottom: -14rem;
+  z-index: -1;
+  pointer-events: none;
+  border: 1px solid color-mix(in srgb, var(--primary) 9%, transparent);
+  box-shadow:
+    0 0 0 3.5rem color-mix(in srgb, var(--primary) 2.5%, transparent),
+    0 0 0 8rem color-mix(in srgb, var(--primary) 2%, transparent);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+/* Dark scrollbar */
+.dark ::-webkit-scrollbar-thumb {
+  background: #3a4256;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #4b5470;
 }
 
 /* Mobile: prevent horizontal page overflow from wide tables/cards */
@@ -99,12 +201,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #c7cedb;
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #9aa5b8;
 }
 
 /* Hide number input spinners */
@@ -119,9 +221,30 @@ input[type="number"] {
   appearance: textfield;
 }
 
+/* Native selects must not inherit the browser's white popup in dark mode */
+.dark select option {
+  background-color: var(--surface);
+  color: var(--foreground);
+}
+
+.dark input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.8);
+}
+
 /* Safe area for mobile bottom nav */
 .pb-safe {
   padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Keep interactive elements clear of the fixed mobile bottom nav when
+   browsers scroll them into view (e.g. wizard Back/Next buttons). */
+button,
+a,
+input,
+select,
+textarea,
+[role="button"] {
+  scroll-margin-bottom: 6.5rem;
 }
 
 /* Subtle entrance animation */
@@ -166,4 +289,16 @@ input[type="number"] {
 
 .animate-scale-in {
   animation: scale-in 0.2s ease-out;
+}
+
+/* Premium card surface — used by Card + StatCard and page-level cards */
+.card-surface {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.dark .card-surface {
+  background-color: var(--surface);
 }

@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Select, Textarea } from "@/components/ui/form";
 import { Icon } from "@/components/ui/icon";
 import { formatDate, formatNumber } from "@/lib/format";
-import { installTyre, replaceTyre, removeTyre } from "./actions";
+import { replaceTyre } from "./actions";
 import type { LayoutPosition } from "./vehicle-detail-client";
 
 type AvailableTyre = {
@@ -65,10 +65,10 @@ function OdometerOverride({
   if (!isLower) return null;
 
   return (
-    <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 space-y-3">
+    <div className="rounded-lg border border-warning/30 bg-warning-soft p-3 space-y-3">
       <div className="flex items-start gap-2">
-        <Icon name="alert-triangle" size={16} className="text-amber-600 mt-0.5 shrink-0" />
-        <p className="text-xs text-amber-800">
+        <Icon name="alert-triangle" size={16} className="text-warning mt-0.5 shrink-0" />
+        <p className="text-xs text-warning">
           This reading is below the current odometer for this vehicle ({formatNumber(currentOdometer)} km).
           To record it, enable the override and provide a documented reason.
         </p>
@@ -92,151 +92,6 @@ function OdometerOverride({
         />
       )}
     </div>
-  );
-}
-
-export function InstallForm({
-  vehicle,
-  position,
-  tyres,
-  drivers,
-  onCancel,
-  onSuccess,
-  onError,
-}: {
-  vehicle: Vehicle;
-  position: LayoutPosition;
-  tyres: AvailableTyre[];
-  drivers: Driver[];
-  onCancel: () => void;
-  onSuccess: (message: string) => void;
-  onError: (errors: FormErrors) => void;
-}) {
-  const [tyreId, setTyreId] = React.useState("");
-  const [driverId, setDriverId] = React.useState("");
-  const [installedAt, setInstalledAt] = React.useState(todayInputValue());
-  const [odometer, setOdometer] = React.useState(String(vehicle.currentOdometer));
-  const [notes, setNotes] = React.useState("");
-  const [override, setOverride] = React.useState(false);
-  const [overrideReason, setOverrideReason] = React.useState("");
-  const [errors, setErrors] = React.useState<FormErrors>({});
-  const [loading, setLoading] = React.useState(false);
-
-  const selectedTyre = tyres.find((t) => t.id === tyreId);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrors({});
-    setLoading(true);
-    const result = await installTyre({
-      vehicleId: vehicle.id,
-      positionId: position.id,
-      tyreId,
-      driverId: driverId || undefined,
-      installedAt,
-      odometer: parseFloat(odometer),
-      notes: notes || undefined,
-      odometerOverride: override,
-      odometerOverrideReason: overrideReason || undefined,
-    });
-    setLoading(false);
-    if (result.ok) {
-      onSuccess(`Tyre ${selectedTyre?.internalId ?? ""} installed on ${position.displayName}`);
-    } else {
-      setErrors(result.errors);
-      onError(result.errors);
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-      <div className="bg-muted-soft/50 rounded-lg p-3 text-sm">
-        <p className="text-muted">Installing into</p>
-        <p className="font-semibold text-foreground">
-          {vehicle.registrationNo} · {position.displayName}
-        </p>
-      </div>
-
-      <Select
-        label="Tyre"
-        name="tyreId"
-        value={tyreId}
-        onChange={(e) => setTyreId(e.target.value)}
-        error={errors.tyreId}
-        placeholder="Select available tyre"
-        options={tyres.map((t) => ({
-          value: t.id,
-          label: `${t.internalId} — ${t.tyreModel.brand} ${t.tyreModel.name} (${t.tyreModel.size})`,
-        }))}
-        required
-      />
-
-      <Select
-        label="Driver"
-        name="driverId"
-        value={driverId}
-        onChange={(e) => setDriverId(e.target.value)}
-        error={errors.driverId}
-        placeholder="Select driver (optional)"
-        options={drivers.map((d) => ({ value: d.id, label: d.name }))}
-      />
-
-      <div className="grid grid-cols-2 gap-3">
-        <Input
-          label="Installation date"
-          name="installedAt"
-          type="date"
-          value={installedAt}
-          onChange={(e) => setInstalledAt(e.target.value)}
-          error={errors.installedAt}
-          required
-        />
-        <Input
-          label="Odometer (km)"
-          name="odometer"
-          type="number"
-          min="0"
-          inputMode="numeric"
-          value={odometer}
-          onChange={(e) => setOdometer(e.target.value)}
-          error={errors.odometer}
-          required
-        />
-      </div>
-
-      <OdometerOverride
-        currentOdometer={vehicle.currentOdometer}
-        value={odometer}
-        override={override}
-        reason={overrideReason}
-        onOverrideChange={setOverride}
-        onReasonChange={setOverrideReason}
-      />
-
-      <Textarea
-        label="Notes"
-        name="notes"
-        value={notes}
-        onChange={(e) => setNotes(e.target.value)}
-        placeholder="Optional notes"
-        error={errors.notes}
-      />
-
-      {errors._form && (
-        <div className="rounded-lg border border-danger/30 bg-danger/5 p-3 text-sm text-danger" role="alert">
-          {errors._form}
-        </div>
-      )}
-
-      <div className="flex gap-3 pt-1">
-        <Button type="button" variant="outline" className="flex-1" onClick={onCancel} disabled={loading}>
-          Cancel
-        </Button>
-        <Button type="submit" className="flex-1" loading={loading} disabled={!tyreId}>
-          Install Tyre
-        </Button>
-      </div>
-    </form>
   );
 }
 
@@ -310,7 +165,7 @@ export function ReplaceForm({
     <form onSubmit={handleSubmit} className="space-y-4" noValidate>
       {/* Current tyre summary */}
       {currentTyre && currentInst && (
-        <div className="bg-white border border-border rounded-lg p-3 space-y-2">
+        <div className="bg-surface border border-border rounded-lg p-3 space-y-2">
           <p className="text-xs text-muted">Current tyre</p>
           <p className="text-sm font-semibold text-foreground">{currentTyre.internalId}</p>
           <p className="text-xs text-muted">
@@ -336,7 +191,7 @@ export function ReplaceForm({
         <h4 className="text-sm font-semibold text-foreground mb-3">Removal information</h4>
         <div className="grid grid-cols-2 gap-3">
           <Input
-            label="Removal date"
+            label="Date"
             name="removedAt"
             type="date"
             value={removedAt}
@@ -370,19 +225,20 @@ export function ReplaceForm({
 
         <div className="mt-3">
           <Select
-            label="Removal reason"
+            label="Replacement reason"
             name="removalReasonId"
             value={removalReasonId}
             onChange={(e) => setRemovalReasonId(e.target.value)}
             error={errors.removalReasonId}
-            placeholder="Select reason (optional)"
+            placeholder="Select reason"
             options={removalReasons.map((r) => ({ value: r.id, label: r.name }))}
+            required
           />
         </div>
 
         <div className="mt-3">
           <Textarea
-            label="Removal notes"
+            label="Notes"
             name="removalNotes"
             value={removalNotes}
             onChange={(e) => setRemovalNotes(e.target.value)}
@@ -403,7 +259,7 @@ export function ReplaceForm({
           placeholder="Select available tyre"
           options={tyres.map((t) => ({
             value: t.id,
-            label: `${t.internalId} — ${t.tyreModel.brand} ${t.tyreModel.name} (${t.tyreModel.size})`,
+            label: `${t.tyreModel.brand} ${t.tyreModel.name} (${t.tyreModel.size}) — ${t.internalId}`,
           }))}
           required
         />
@@ -441,139 +297,7 @@ export function ReplaceForm({
           Cancel
         </Button>
         <Button type="submit" className="flex-1" loading={loading} disabled={!newTyreId}>
-          Replace Tyre
-        </Button>
-      </div>
-    </form>
-  );
-}
-
-export function RemoveForm({
-  vehicle,
-  position,
-  removalReasons,
-  onCancel,
-  onSuccess,
-  onError,
-}: {
-  vehicle: Vehicle;
-  position: LayoutPosition;
-  removalReasons: RemovalReason[];
-  onCancel: () => void;
-  onSuccess: (message: string) => void;
-  onError: (errors: FormErrors) => void;
-}) {
-  const currentTyre = position.currentTyre;
-  const currentInst = currentTyre?.currentInstallation;
-
-  const [removedAt, setRemovedAt] = React.useState(todayInputValue());
-  const [odometer, setOdometer] = React.useState(String(vehicle.currentOdometer));
-  const [removalReasonId, setRemovalReasonId] = React.useState("");
-  const [removalNotes, setRemovalNotes] = React.useState("");
-  const [override, setOverride] = React.useState(false);
-  const [overrideReason, setOverrideReason] = React.useState("");
-  const [errors, setErrors] = React.useState<FormErrors>({});
-  const [loading, setLoading] = React.useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!currentTyre || !currentInst) return;
-    setErrors({});
-    setLoading(true);
-    const result = await removeTyre({
-      installationId: currentInst.id,
-      vehicleId: vehicle.id,
-      tyreId: currentTyre.id,
-      removedAt,
-      odometer: parseFloat(odometer),
-      removalReasonId: removalReasonId || undefined,
-      removalNotes: removalNotes || undefined,
-      odometerOverride: override,
-      odometerOverrideReason: overrideReason || undefined,
-    });
-    setLoading(false);
-    if (result.ok) {
-      onSuccess(`Tyre ${currentTyre.internalId} removed from ${position.displayName}`);
-    } else {
-      setErrors(result.errors);
-      onError(result.errors);
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-      {currentTyre && (
-        <div className="bg-muted-soft/50 rounded-lg p-3 text-sm">
-          <p className="text-muted">Removing</p>
-          <p className="font-semibold text-foreground">
-            {currentTyre.internalId} from {position.displayName}
-          </p>
-        </div>
-      )}
-
-      <div className="grid grid-cols-2 gap-3">
-        <Input
-          label="Removal date"
-          name="removedAt"
-          type="date"
-          value={removedAt}
-          onChange={(e) => setRemovedAt(e.target.value)}
-          error={errors.removedAt}
-          required
-        />
-        <Input
-          label="Odometer (km)"
-          name="odometer"
-          type="number"
-          min="0"
-          inputMode="numeric"
-          value={odometer}
-          onChange={(e) => setOdometer(e.target.value)}
-          error={errors.odometer}
-          required
-        />
-      </div>
-
-      <OdometerOverride
-        currentOdometer={vehicle.currentOdometer}
-        value={odometer}
-        override={override}
-        reason={overrideReason}
-        onOverrideChange={setOverride}
-        onReasonChange={setOverrideReason}
-      />
-
-      <Select
-        label="Removal reason"
-        name="removalReasonId"
-        value={removalReasonId}
-        onChange={(e) => setRemovalReasonId(e.target.value)}
-        error={errors.removalReasonId}
-        placeholder="Select reason (optional)"
-        options={removalReasons.map((r) => ({ value: r.id, label: r.name }))}
-      />
-
-      <Textarea
-        label="Removal notes"
-        name="removalNotes"
-        value={removalNotes}
-        onChange={(e) => setRemovalNotes(e.target.value)}
-        placeholder="Optional notes"
-        error={errors.removalNotes}
-      />
-
-      {errors._form && (
-        <div className="rounded-lg border border-danger/30 bg-danger/5 p-3 text-sm text-danger" role="alert">
-          {errors._form}
-        </div>
-      )}
-
-      <div className="flex gap-3 pt-1">
-        <Button type="button" variant="outline" className="flex-1" onClick={onCancel} disabled={loading}>
-          Cancel
-        </Button>
-        <Button type="submit" variant="danger" className="flex-1" loading={loading}>
-          Remove Tyre
+          Confirm Replacement
         </Button>
       </div>
     </form>

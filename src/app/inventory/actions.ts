@@ -3,85 +3,134 @@
 import { db } from "@/lib/db";
 import { logActivity } from "@/lib/audit";
 import { revalidatePath } from "next/cache";
-import type { TyreStatus } from "@/lib/types";
 
-/**
- * Valid lifecycle transitions for manual status changes in inventory.
- * Installations/removals are handled by their own transactional workflows.
- */
-const VALID_TRANSITIONS: Record<TyreStatus, TyreStatus[]> = {
-  AVAILABLE: ["RESERVED", "DAMAGED", "SCRAPPED"],
-  RESERVED: ["AVAILABLE"],
-  // INSTALLED tyres may only leave this state through the removal/replacement
-  // workflow (Phase 6). Blocking manual changes here prevents invalid states.
-  INSTALLED: [],
-  REMOVED: ["AVAILABLE", "WORN_OUT", "DAMAGED", "SCRAPPED"],
-  // Worn/damaged tyres may be scrapped; damaged tyres may also be re-checked
-  // back into service (repairable damage), but a worn tyre cannot return.
-  WORN_OUT: ["SCRAPPED"],
-  DAMAGED: ["AVAILABLE", "SCRAPPED"],
-  SCRAPPED: [],
+type ActionResult = { ok: true } | { ok: false; errors: Record<string, string> };
+
+export type AdjustInventoryInput = {
+  tyreModelId: string;
+  quantity: number;
+  reason: string;
+  notes?: string;
 };
 
-export async function setTyreStatus(
-  tyreId: string,
-  newStatus: TyreStatus,
-  notes?: string
-) {
-  try {
-    const tyre = await db.tyre.findUnique({
-      where: { id: tyreId },
-      include: {
-        tyreModel: { select: { brand: true, name: true } },
-      },
-    });
-    if (!tyre) {
-      return { ok: false, errors: { _form: "Tyre not found." } };
-    }
+export async function adjustInventory(input: AdjustInventoryInput): Promise<ActionResult> {
+  const errors: Record<string, string> = {};
+  if (!input.tyreModelId) errors.tyreModelId = "Model is required";
+  if (!input.quantity || input.quantity <= 0 || !Number.isInteger(input.quantity)) {
+    errors.quantity = "Quantity must be a positive whole number";
+  }
+  if (!input.reason?.trim()) errors.reason = "A reason is required";
+  if (Object.keys(errors).length > 0) return { ok: false, errors };
 
-    const allowed = VALID_TRANSITIONS[tyre.status] ?? [];
-    if (!allowed.includes(newStatus)) {
+  try {
+    await db.$transaction(async (tx) => {
+      const model = await tx.tyreModel.findUnique({ where: { id: input.tyreModelId } });
+      if (!model || model.status !== "ACTIVE") {
+        throw new Error("MODEL_INVALID");
+      }
+
+      const availableCount = await tx.tyre.count({
+        where: { tyreModelId: input.tyreModelId, status: "AVAILABLE" },
+      });
+      if (input.quantity > availableCount) {
+        throw new Error("INSUFFICIENT");
+      }
+
+      // Mark N available tyres as REMOVED for the selected model
+      const tyres = await tx.tyre.findMany({
+        where: { tyreModelId: input.tyreModelId, status: "AVAILABLE" },
+        take: input.quantity,
+        orderBy: { createdAt: "asc" },
+      });
+
+      for (const tyre of tyres) {
+        await tx.tyre.update({
+          where: { id: tyre.id },
+          data: { status: "REMOVED" },
+        });
+        await tx.tyreLifecycleEvent.create({
+          data: {
+            tyreId: tyre.id,
+            type: "ADJUSTED",
+            description: `Inventory adjusted: removed from available stock (${input.reason.trim()})`,
+            metadata: JSON.stringify({ reason: input.reason.trim(), notes: input.notes?.trim() || null }),
+          },
+        });
+      }
+
+      await tx.inventoryAdjustment.create({
+        data: {
+          tyreModelId: input.tyreModelId,
+          quantity: input.quantity,
+          reason: input.reason.trim(),
+          notes: input.notes?.trim() || null,
+        },
+      });
+
+      return { count: tyres.length };
+    });
+
+    await logActivity({
+      action: "INVENTORY_ADJUST",
+      entityType: "TyreModel",
+      entityId: input.tyreModelId,
+      description: `Inventory adjusted: ${input.quantity} tyre(s) removed from available stock for ${input.reason.trim()}`,
+      newValue: JSON.stringify({ quantity: input.quantity, reason: input.reason.trim() }),
+    });
+
+    revalidatePath("/inventory");
+    revalidatePath("/");
+    return { ok: true };
+  } catch (error) {
+    if (error instanceof Error && error.message === "INSUFFICIENT") {
+      return {
+        ok: false,
+        errors: { _form: "Cannot remove more tyres than are currently available." },
+      };
+    }
+    if (error instanceof Error && error.message === "MODEL_INVALID") {
+      return {
+        ok: false,
+        errors: { _form: "The selected model is invalid or inactive." },
+      };
+    }
+    console.error("adjustInventory failed:", error);
+    return { ok: false, errors: { _form: "Unable to adjust inventory. Please try again." } };
+  }
+}
+
+export async function deleteTyreModel(modelId: string): Promise<ActionResult> {
+  try {
+    const model = await db.tyreModel.findUnique({
+      where: { id: modelId },
+      include: { tyres: { select: { id: true } }, purchaseItems: { select: { id: true } } },
+    });
+    if (!model) return { ok: false, errors: { _form: "Model not found." } };
+
+    if (model.tyres.length > 0 || model.purchaseItems.length > 0) {
       return {
         ok: false,
         errors: {
-          _form: `Tyre ${tyre.internalId} cannot be changed from ${tyre.status} to ${newStatus}.`,
+          _form:
+            "This model is linked to tyres or purchase history and cannot be permanently deleted. Deactivate it instead.",
         },
       };
     }
 
-    await db.tyre.update({
-      where: { id: tyreId },
-      data: { status: newStatus },
-    });
-
-    await db.tyreLifecycleEvent.create({
-      data: {
-        tyreId,
-        type: "STATUS_CHANGED",
-        description: `Status changed from ${tyre.status} to ${newStatus}`,
-        metadata: JSON.stringify({
-          from: tyre.status,
-          to: newStatus,
-          notes: notes?.trim() || null,
-        }),
-      },
-    });
+    await db.tyreModel.delete({ where: { id: modelId } });
 
     await logActivity({
-      action: "STATUS_CHANGE",
-      entityType: "Tyre",
-      entityId: tyreId,
-      description: `Tyre ${tyre.internalId} status changed from ${tyre.status} to ${newStatus}`,
-      previousValue: tyre.status,
-      newValue: newStatus,
-      tyreId,
+      action: "DELETE",
+      entityType: "TyreModel",
+      entityId: modelId,
+      description: `Tyre model "${model.brand} ${model.name}" deleted`,
     });
 
     revalidatePath("/inventory");
-    revalidatePath("/tyres");
+    revalidatePath("/tyre-models");
     return { ok: true };
   } catch (error) {
-    console.error("setTyreStatus failed:", error);
-    return { ok: false, errors: { _form: "Failed to update tyre status." } };
+    console.error("deleteTyreModel failed:", error);
+    return { ok: false, errors: { _form: "Unable to delete this model. Please try again." } };
   }
 }

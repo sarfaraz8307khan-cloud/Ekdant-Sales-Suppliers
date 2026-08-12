@@ -11,8 +11,8 @@ export default async function SettingsPage() {
       settings={{
         businessName: settings?.businessName ?? "Ekdant Sales & Suppliers",
         logoPath: settings?.logoPath ?? null,
+        theme: settings?.theme ?? "SYSTEM",
       }}
-      hasAuth={false}
     />
   );
 }

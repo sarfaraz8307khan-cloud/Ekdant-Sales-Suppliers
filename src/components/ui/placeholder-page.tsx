@@ -12,7 +12,7 @@ export function PlaceholderPage({
   return (
     <div>
       <h1 className="text-xl sm:text-2xl font-bold text-foreground mb-5">{title}</h1>
-      <div className="bg-white rounded-xl border border-border shadow-sm">
+      <div className="bg-surface rounded-xl border border-border shadow-sm">
         <EmptyState
           icon={icon}
           title={`${title} module`}

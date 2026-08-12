@@ -18,6 +18,16 @@ export { Prisma }
 export * as $Enums from './enums'
 export * from './enums';
 /**
+ * Model User
+ * 
+ */
+export type User = Prisma.UserModel
+/**
+ * Model PasswordReset
+ * 
+ */
+export type PasswordReset = Prisma.PasswordResetModel
+/**
  * Model ApplicationSettings
  * 
  */
@@ -97,6 +107,16 @@ export type TyreLifecycleEvent = Prisma.TyreLifecycleEventModel
  * 
  */
 export type OdometerReading = Prisma.OdometerReadingModel
+/**
+ * Model Expenditure
+ * 
+ */
+export type Expenditure = Prisma.ExpenditureModel
+/**
+ * Model InventoryAdjustment
+ * 
+ */
+export type InventoryAdjustment = Prisma.InventoryAdjustmentModel
 /**
  * Model ActivityLog
  * 

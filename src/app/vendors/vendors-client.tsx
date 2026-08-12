@@ -12,7 +12,7 @@ import { StatusBadge } from "@/components/ui/badge";
 import { Icon } from "@/components/ui/icon";
 import { EmptyState } from "@/components/ui/states";
 import { useToast } from "@/components/ui/toast";
-import { createVendor, updateVendor, setVendorStatus, type VendorFormData } from "./actions";
+import { createVendor, updateVendor, setVendorStatus, deleteVendor, type VendorFormData } from "./actions";
 
 type Vendor = {
   id: string;
@@ -40,11 +40,7 @@ const emptyForm: VendorFormData = {
 export function VendorsClient({ initialVendors }: { initialVendors: Vendor[] }) {
   const router = useRouter();
   const { toast } = useToast();
-  const [vendors, setVendors] = React.useState(initialVendors);
-  // Keep client state in sync after server mutations + router.refresh()
-  React.useEffect(() => {
-    setVendors(initialVendors);
-  }, [initialVendors]);
+  const vendors = initialVendors;
   const [search, setSearch] = React.useState("");
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [editing, setEditing] = React.useState<Vendor | null>(null);
@@ -53,6 +49,8 @@ export function VendorsClient({ initialVendors }: { initialVendors: Vendor[] }) 
   const [saving, setSaving] = React.useState(false);
   const [statusTarget, setStatusTarget] = React.useState<Vendor | null>(null);
   const [statusLoading, setStatusLoading] = React.useState(false);
+  const [deleteTarget, setDeleteTarget] = React.useState<Vendor | null>(null);
+  const [deleteLoading, setDeleteLoading] = React.useState(false);
 
   const filtered = React.useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -123,6 +121,21 @@ export function VendorsClient({ initialVendors }: { initialVendors: Vendor[] }) 
     }
   };
 
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleteLoading(true);
+    const result = await deleteVendor(deleteTarget.id);
+    setDeleteLoading(false);
+    if (result.ok) {
+      toast("success", "Vendor deleted successfully");
+      setDeleteTarget(null);
+      router.refresh();
+    } else {
+      toast("error", result.errors?._form ?? "Unable to delete this vendor.");
+      setDeleteTarget(null);
+    }
+  };
+
   return (
     <div>
       <PageHeader
@@ -157,7 +170,7 @@ export function VendorsClient({ initialVendors }: { initialVendors: Vendor[] }) 
           {filtered.map((v) => (
             <div
               key={v.id}
-              className="bg-white rounded-xl border border-border shadow-sm p-4"
+              className="bg-surface rounded-xl border border-border shadow-sm p-4"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
@@ -176,6 +189,13 @@ export function VendorsClient({ initialVendors }: { initialVendors: Vendor[] }) 
                     aria-label={`Edit ${v.name}`}
                   >
                     <Icon name="pencil" size={16} />
+                  </button>
+                  <button
+                    onClick={() => setDeleteTarget(v)}
+                    className="p-2 rounded-lg hover:bg-danger-soft hover:text-danger text-muted transition-colors"
+                    aria-label={`Delete ${v.name}`}
+                  >
+                    <Icon name="trash-2" size={16} />
                   </button>
                   <button
                     onClick={() => setStatusTarget(v)}
@@ -313,6 +333,17 @@ export function VendorsClient({ initialVendors }: { initialVendors: Vendor[] }) 
         confirmLabel={statusTarget?.status === "ACTIVE" ? "Deactivate" : "Activate"}
         danger={statusTarget?.status === "ACTIVE"}
         loading={statusLoading}
+      />
+
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleDelete}
+        title="Delete vendor?"
+        message={`Delete ${deleteTarget?.name ?? ""}? This action cannot be undone.`}
+        confirmLabel="Delete"
+        danger
+        loading={deleteLoading}
       />
     </div>
   );

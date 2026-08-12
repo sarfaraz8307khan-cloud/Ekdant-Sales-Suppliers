@@ -89,7 +89,7 @@ export function ReportToolbar({
           <select
             value={sort.key}
             onChange={(e) => onSortChange({ key: e.target.value, asc: sort.asc })}
-            className="h-9 px-2 rounded-lg border border-border text-xs bg-white"
+            className="h-9 px-2 rounded-lg border border-border text-xs bg-surface"
           >
             {sortOptions.map((o) => (
               <option key={o.key} value={o.key}>

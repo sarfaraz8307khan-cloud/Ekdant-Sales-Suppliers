@@ -52,7 +52,7 @@ export function SearchInput({
         value={localValue}
         onChange={handleChange}
         placeholder={placeholder}
-        className="w-full h-10 pl-9 pr-9 rounded-lg border border-border bg-white text-sm placeholder:text-muted/70 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+        className="w-full h-10 pl-9 pr-9 rounded-lg border border-border bg-surface text-sm placeholder:text-muted/70 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
         aria-label={placeholder}
       />
       {localValue && (

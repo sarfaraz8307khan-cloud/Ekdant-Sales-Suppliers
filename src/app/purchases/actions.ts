@@ -187,6 +187,60 @@ export async function createPurchase(data: PurchaseFormData) {
   }
 }
 
+export async function deletePurchase(id: string) {
+  try {
+    const purchase = await db.purchase.findUnique({
+      where: { id },
+      include: {
+        items: {
+          include: {
+            tyres: { include: { installations: { select: { id: true } } } },
+          },
+        },
+      },
+    });
+    if (!purchase) return { ok: false, errors: { _form: "Purchase not found." } };
+
+    const tyres = purchase.items.flatMap((i) => i.tyres);
+    const hasHistory = tyres.some(
+      (t) => t.installations.length > 0 || t.status !== "AVAILABLE"
+    );
+    if (hasHistory) {
+      return {
+        ok: false,
+        errors: {
+          _form:
+            "This purchase contains tyres that have been installed or used and cannot be permanently deleted.",
+        },
+      };
+    }
+
+    // Transactional delete: remove the tyres (lifecycle events cascade),
+    // then the purchase (its items cascade). Nothing is left partially updated.
+    await db.$transaction(async (tx) => {
+      for (const t of tyres) {
+        await tx.tyre.delete({ where: { id: t.id } });
+      }
+      await tx.purchase.delete({ where: { id } });
+    });
+
+    await logActivity({
+      action: "DELETE",
+      entityType: "Purchase",
+      entityId: id,
+      description: `Purchase bill ${purchase.billNumber} deleted (${tyres.length} tyres removed from inventory)`,
+      previousValue: purchase.billNumber,
+    });
+
+    revalidatePath("/purchases");
+    revalidatePath("/inventory");
+    return { ok: true, deletedTyres: tyres.length };
+  } catch (error) {
+    console.error("deletePurchase failed:", error);
+    return { ok: false, errors: { _form: "Unable to delete this purchase. Please try again." } };
+  }
+}
+
 export async function setPurchaseStatus(id: string, status: "ACTIVE" | "INACTIVE" | "ARCHIVED") {
   try {
     const purchase = await db.purchase.update({

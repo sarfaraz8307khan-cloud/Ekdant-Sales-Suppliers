@@ -12,7 +12,7 @@ import { StatusBadge } from "@/components/ui/badge";
 import { Icon } from "@/components/ui/icon";
 import { EmptyState } from "@/components/ui/states";
 import { useToast } from "@/components/ui/toast";
-import { createDriver, updateDriver, setDriverStatus, type DriverFormData } from "./actions";
+import { createDriver, updateDriver, setDriverStatus, deleteDriver, type DriverFormData } from "./actions";
 
 type Driver = {
   id: string;
@@ -36,11 +36,7 @@ const emptyForm: DriverFormData = {
 export function DriversClient({ initialDrivers }: { initialDrivers: Driver[] }) {
   const router = useRouter();
   const { toast } = useToast();
-  const [drivers, setDrivers] = React.useState(initialDrivers);
-  // Keep client state in sync after server mutations + router.refresh()
-  React.useEffect(() => {
-    setDrivers(initialDrivers);
-  }, [initialDrivers]);
+  const drivers = initialDrivers;
   const [search, setSearch] = React.useState("");
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [editing, setEditing] = React.useState<Driver | null>(null);
@@ -49,6 +45,8 @@ export function DriversClient({ initialDrivers }: { initialDrivers: Driver[] }) 
   const [saving, setSaving] = React.useState(false);
   const [statusTarget, setStatusTarget] = React.useState<Driver | null>(null);
   const [statusLoading, setStatusLoading] = React.useState(false);
+  const [deleteTarget, setDeleteTarget] = React.useState<Driver | null>(null);
+  const [deleteLoading, setDeleteLoading] = React.useState(false);
 
   const filtered = React.useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -116,6 +114,21 @@ export function DriversClient({ initialDrivers }: { initialDrivers: Driver[] }) 
     }
   };
 
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleteLoading(true);
+    const result = await deleteDriver(deleteTarget.id);
+    setDeleteLoading(false);
+    if (result.ok) {
+      toast("success", "Driver deleted successfully");
+      setDeleteTarget(null);
+      router.refresh();
+    } else {
+      toast("error", result.errors?._form ?? "Unable to delete this driver.");
+      setDeleteTarget(null);
+    }
+  };
+
   return (
     <div>
       <PageHeader
@@ -150,7 +163,7 @@ export function DriversClient({ initialDrivers }: { initialDrivers: Driver[] }) 
           {filtered.map((d) => (
             <div
               key={d.id}
-              className="bg-white rounded-xl border border-border shadow-sm p-4"
+              className="bg-surface rounded-xl border border-border shadow-sm p-4"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
@@ -169,6 +182,13 @@ export function DriversClient({ initialDrivers }: { initialDrivers: Driver[] }) 
                     aria-label={`Edit ${d.name}`}
                   >
                     <Icon name="pencil" size={16} />
+                  </button>
+                  <button
+                    onClick={() => setDeleteTarget(d)}
+                    className="p-2 rounded-lg hover:bg-danger-soft hover:text-danger text-muted transition-colors"
+                    aria-label={`Delete ${d.name}`}
+                  >
+                    <Icon name="trash-2" size={16} />
                   </button>
                   <button
                     onClick={() => setStatusTarget(d)}
@@ -289,6 +309,17 @@ export function DriversClient({ initialDrivers }: { initialDrivers: Driver[] }) 
         confirmLabel={statusTarget?.status === "ACTIVE" ? "Deactivate" : "Activate"}
         danger={statusTarget?.status === "ACTIVE"}
         loading={statusLoading}
+      />
+
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleDelete}
+        title="Delete driver?"
+        message={`Delete ${deleteTarget?.name ?? ""}? This action cannot be undone.`}
+        confirmLabel="Delete"
+        danger
+        loading={deleteLoading}
       />
     </div>
   );
