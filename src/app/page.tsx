@@ -35,6 +35,7 @@ export default async function DashboardPage() {
             },
           },
         },
+        tyres: { select: { id: true } },
       },
       orderBy: { name: "asc" },
     }),
@@ -86,8 +87,11 @@ export default async function DashboardPage() {
   const countByStatus = (status: string) =>
     tyreCounts.find((t) => t.status === status)?._count._all ?? 0;
 
+  // Low-stock alerts only make sense for models that actually have tyre
+  // records — a brand-new model with zero stock history is not "low", it is
+  // simply not stocked yet (keeps a fresh database looking clean).
   const lowStock = lowStockModels
-    .filter((m) => m._count.tyres < m.minStockLevel)
+    .filter((m) => m.tyres.length > 0 && m._count.tyres < m.minStockLevel)
     .map((m) => ({
       id: m.id,
       brand: m.brand,

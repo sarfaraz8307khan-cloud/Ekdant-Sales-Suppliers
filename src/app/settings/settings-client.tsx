@@ -175,6 +175,26 @@ export function SettingsClient({ settings }: { settings: Settings }) {
         </form>
       </div>
 
+      {/* About / Company information */}
+      <div className="bg-surface rounded-xl border border-border shadow-sm p-4 sm:p-6 mt-4">
+        <h2 className="font-semibold text-foreground mb-1">About</h2>
+        <p className="text-sm text-muted mb-4">Company information.</p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="rounded-lg border border-border bg-muted-soft/40 p-3">
+            <p className="text-xs text-muted">Company</p>
+            <p className="text-sm font-semibold text-foreground mt-0.5">Ekdant Sales &amp; Suppliers</p>
+          </div>
+          <div className="rounded-lg border border-border bg-muted-soft/40 p-3">
+            <p className="text-xs text-muted">Founder</p>
+            <p className="text-sm font-semibold text-foreground mt-0.5">Bhagwan Lad</p>
+          </div>
+          <div className="rounded-lg border border-border bg-muted-soft/40 p-3">
+            <p className="text-xs text-muted">Co-Founder</p>
+            <p className="text-sm font-semibold text-foreground mt-0.5">Sharad Lad</p>
+          </div>
+        </div>
+      </div>
+
       {/* Appearance */}
       <div className="bg-surface rounded-xl border border-border shadow-sm p-4 sm:p-6 mt-4">
         <h2 className="font-semibold text-foreground mb-1">Appearance</h2>

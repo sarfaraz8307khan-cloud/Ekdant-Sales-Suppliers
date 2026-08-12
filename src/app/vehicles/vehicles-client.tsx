@@ -13,7 +13,7 @@ import { StatusBadge, Badge } from "@/components/ui/badge";
 import { Icon } from "@/components/ui/icon";
 import { EmptyState } from "@/components/ui/states";
 import { useToast } from "@/components/ui/toast";
-import { formatNumber } from "@/lib/format";
+import { formatDate, formatNumber } from "@/lib/format";
 import {
   createVehicle,
   updateVehicle,
@@ -30,17 +30,34 @@ type Vehicle = {
   registrationNo: string;
   currentOdometer: number;
   status: "ACTIVE" | "INACTIVE" | "ARCHIVED";
+  vehicleDate: string;
+  location: string | null;
   notes: string | null;
   vehicleType: VehicleType;
   driver: Driver | null;
   _count: { installations: number };
 };
 
+function todayInputValue(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+/** ISO date string → "YYYY-MM-DD" for the native date input. */
+function toDateInputValue(date: string | null | undefined): string {
+  if (!date) return todayInputValue();
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return todayInputValue();
+  const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 10);
+}
+
 const emptyForm: VehicleFormData = {
   registrationNo: "",
   vehicleTypeId: "",
   driverId: "",
   currentOdometer: 0,
+  vehicleDate: todayInputValue(),
+  location: "",
   notes: "",
 };
 
@@ -109,6 +126,8 @@ export function VehiclesClient({
       vehicleTypeId: v.vehicleType.id,
       driverId: v.driver?.id ?? "",
       currentOdometer: v.currentOdometer,
+      vehicleDate: toDateInputValue(v.vehicleDate),
+      location: v.location ?? "",
       notes: v.notes ?? "",
     });
     setErrors({});
@@ -299,6 +318,10 @@ export function VehiclesClient({
                     {v.vehicleType.name} · {v.vehicleType.tyreCount} tyres
                   </p>
                   <p className="text-sm text-muted mt-0.5">
+                    Vehicle date: {formatDate(v.vehicleDate)}
+                    {v.location ? ` · ${v.location}` : ""}
+                  </p>
+                  <p className="text-sm text-muted mt-0.5">
                     Odometer: {formatNumber(v.currentOdometer)} km
                   </p>
                   {v.driver && (
@@ -405,6 +428,25 @@ export function VehiclesClient({
             onChange={(e) => setForm({ ...form, driverId: e.target.value })}
             options={drivers.map((d) => ({ value: d.id, label: d.name }))}
             placeholder="No driver assigned"
+          />
+          <Input
+            label="Vehicle Date"
+            name="vehicleDate"
+            type="date"
+            value={form.vehicleDate}
+            max={todayInputValue()}
+            onChange={(e) => setForm({ ...form, vehicleDate: e.target.value })}
+            error={errors.vehicleDate}
+            hint="Date the vehicle was purchased/received. Can be a past date."
+            required
+          />
+          <Input
+            label="Location"
+            name="location"
+            value={form.location}
+            onChange={(e) => setForm({ ...form, location: e.target.value })}
+            placeholder="e.g. Ekdant Yard"
+            error={errors.location}
           />
           <Input
             label="Current Odometer (km)"

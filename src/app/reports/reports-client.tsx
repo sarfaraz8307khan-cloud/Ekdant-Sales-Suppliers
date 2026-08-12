@@ -51,6 +51,8 @@ type VehicleTyre = {
 type Vehicle = {
   id: string;
   registrationNo: string;
+  vehicleDate: Date | string;
+  location: string | null;
   vehicleType: {
     id: string;
     name: string;
@@ -525,7 +527,9 @@ function VehicleTyreReport({
       (v) =>
         `<h3>${escapeHtml(v.registrationNo)} — ${escapeHtml(v.vehicleType.name)} (${
           v.currentTyres.length
-        } of ${v.vehicleType.tyrePositions.length} filled)</h3>` +
+        } of ${v.vehicleType.tyrePositions.length} filled) · Vehicle date ${escapeHtml(
+          formatDate(v.vehicleDate)
+        )}${v.location ? ` · ${escapeHtml(v.location)}` : ""}</h3>` +
         htmlTable(
           ["Position", "Tyre", "Model", "Installed", "Odometer"],
           v.vehicleType.tyrePositions.map((pos) => {
@@ -565,6 +569,10 @@ function VehicleTyreReport({
               <CardTitle>{v.registrationNo}</CardTitle>
               <p className="text-sm text-muted">
                 {v.vehicleType.name} · {v.currentTyres.length} of {v.vehicleType.tyrePositions.length} positions filled
+              </p>
+              <p className="text-xs text-muted">
+                Vehicle date: {formatDate(v.vehicleDate)}
+                {v.location ? ` · Location: ${v.location}` : ""}
               </p>
             </CardHeader>
             <CardContent className="overflow-x-auto">

@@ -10,15 +10,48 @@ export type VehicleFormData = {
   vehicleTypeId: string;
   driverId?: string;
   currentOdometer: number;
+  vehicleDate?: string;
+  location?: string;
   notes?: string;
 };
+
+/** "YYYY-MM-DD" (local) → Date, without UTC-shifting the entered day. */
+function parseDateInput(value: string): Date | null {
+  if (!value) return null;
+  const d = new Date(`${value}T00:00:00`);
+  return isNaN(d.getTime()) ? null : d;
+}
 
 function validateVehicle(data: VehicleFormData) {
   const errors: Record<string, string> = {};
   if (!data.registrationNo?.trim()) errors.registrationNo = "Registration number is required";
   if (!data.vehicleTypeId) errors.vehicleTypeId = "Vehicle type is required";
   if (data.currentOdometer < 0) errors.currentOdometer = "Odometer cannot be negative";
+  if (data.vehicleDate) {
+    const d = parseDateInput(data.vehicleDate);
+    if (!d) {
+      errors.vehicleDate = "Vehicle date is invalid";
+    } else {
+      const today = new Date();
+      today.setHours(23, 59, 59, 999);
+      if (d > today) errors.vehicleDate = "Vehicle date cannot be in the future";
+    }
+  }
   return errors;
+}
+
+/** Common create/update fields (location never affects inventory or purchases). */
+function vehicleWriteData(data: VehicleFormData) {
+  return {
+    registrationNo: data.registrationNo.trim().toUpperCase(),
+    vehicleTypeId: data.vehicleTypeId,
+    // Empty string from an unset select must not become an FK value
+    driverId: data.driverId ? data.driverId : undefined,
+    currentOdometer: data.currentOdometer,
+    vehicleDate: data.vehicleDate ? (parseDateInput(data.vehicleDate) ?? new Date()) : new Date(),
+    location: data.location?.trim() || null,
+    notes: data.notes?.trim() || null,
+  };
 }
 
 export async function createVehicle(data: VehicleFormData) {
@@ -32,14 +65,7 @@ export async function createVehicle(data: VehicleFormData) {
     // tyres in a single transaction so we never leave a half-created vehicle.
     const { vehicle, tyreStats } = await db.$transaction(async (tx) => {
       const vehicle = await tx.vehicle.create({
-        data: {
-          registrationNo: data.registrationNo.trim().toUpperCase(),
-          vehicleTypeId: data.vehicleTypeId,
-          // Empty string from an unset select must not become an FK value
-          driverId: data.driverId ? data.driverId : undefined,
-          currentOdometer: data.currentOdometer,
-          notes: data.notes?.trim() || null,
-        },
+        data: vehicleWriteData(data),
       });
       const tyreStats = await ensureVehicleTyres(vehicle.id, tx);
       return { vehicle, tyreStats };
@@ -78,14 +104,7 @@ export async function updateVehicle(id: string, data: VehicleFormData) {
 
     const vehicle = await db.vehicle.update({
       where: { id },
-      data: {
-        registrationNo: data.registrationNo.trim().toUpperCase(),
-        vehicleTypeId: data.vehicleTypeId,
-        // Empty string from an unset select must not become an FK value
-        driverId: data.driverId ? data.driverId : undefined,
-        currentOdometer: data.currentOdometer,
-        notes: data.notes?.trim() || null,
-      },
+      data: vehicleWriteData(data),
     });
 
     await logActivity({

@@ -13,7 +13,15 @@ export default async function VehiclesPage({
     await Promise.all([
       db.vehicle.findMany({
         orderBy: [{ status: "asc" }, { registrationNo: "asc" }],
-        include: {
+        select: {
+          id: true,
+          registrationNo: true,
+          vehicleTypeId: true,
+          currentOdometer: true,
+          status: true,
+          vehicleDate: true,
+          location: true,
+          notes: true,
           vehicleType: { select: { id: true, name: true, tyreCount: true } },
           driver: { select: { id: true, name: true } },
           _count: { select: { installations: true } },
@@ -55,9 +63,15 @@ export default async function VehiclesPage({
     )
     .map((v) => v.id);
 
+  // Serialize dates so the client receives plain ISO strings (RSC-safe).
+  const serializedVehicles = vehicles.map((v) => ({
+    ...v,
+    vehicleDate: v.vehicleDate.toISOString(),
+  }));
+
   return (
     <VehiclesClient
-      initialVehicles={vehicles}
+      initialVehicles={serializedVehicles}
       vehicleTypes={vehicleTypes}
       drivers={drivers}
       incompleteVehicleIds={incompleteVehicleIds}

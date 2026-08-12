@@ -27,6 +27,11 @@ export async function ensureVehicleTyres(
   });
   if (!vehicle) return { created: 0, total: 0 };
 
+  // Factory-fitted tyres are "installed" on the vehicle's purchase/received
+  // date (vehicleDate), not today — so backdated replacements remain valid
+  // (a replacement can never predate the tyre it is replacing).
+  const factoryDate = vehicle.vehicleDate ? new Date(vehicle.vehicleDate) : new Date();
+
   // All active positions configured for this vehicle type.
   const positions = await client.tyrePosition.findMany({
     where: { vehicleTypeId: vehicle.vehicleTypeId, status: "ACTIVE" },
@@ -86,7 +91,7 @@ export async function ensureVehicleTyres(
           vehicleId: vehicle.id,
           positionId: pos.id,
           driverId: vehicle.driverId ?? null,
-          installedAt: new Date(),
+          installedAt: factoryDate,
           odometer: vehicle.currentOdometer,
           isCurrent: true,
         },

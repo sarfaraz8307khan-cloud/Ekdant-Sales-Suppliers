@@ -49,9 +49,12 @@ export function AuthShell({
           {children}
         </div>
 
-        <p className="text-center text-indigo-200/50 text-xs mt-6 animate-fade-in-up [animation-delay:200ms]">
-          © {new Date().getFullYear()} Ekdant Sales & Suppliers
-        </p>
+        <div className="text-center text-indigo-200/50 text-xs mt-6 space-y-1 animate-fade-in-up [animation-delay:200ms]">
+          <p>© {new Date().getFullYear()} Ekdant Sales & Suppliers</p>
+          <p>
+            Founder: Bhagwan Lad · Co-Founder: Sharad Lad
+          </p>
+        </div>
       </div>
     </div>
   );

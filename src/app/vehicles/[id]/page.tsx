@@ -43,7 +43,11 @@ export default async function VehicleDetailPage({
         where: { vehicleId: vehicle.id, isCurrent: true },
         include: {
           tyre: {
-            include: {
+            select: {
+              id: true,
+              internalId: true,
+              status: true,
+              purchaseId: true,
               tyreModel: { select: { id: true, brand: true, name: true, size: true } },
             },
           },
@@ -102,6 +106,8 @@ export default async function VehicleDetailPage({
             id: inst.tyre.id,
             internalId: inst.tyre.internalId,
             status: inst.tyre.status,
+            // A tyre with no purchase link is a company-fitted (factory) tyre
+            factoryFitted: inst.tyre.purchaseId === null,
             tyreModel: inst.tyre.tyreModel,
             currentInstallation: {
               id: inst.id,
@@ -136,6 +142,8 @@ export default async function VehicleDetailPage({
         registrationNo: vehicle.registrationNo,
         currentOdometer: vehicle.currentOdometer,
         status: vehicle.status,
+        vehicleDate: vehicle.vehicleDate.toISOString(),
+        location: vehicle.location,
         notes: vehicle.notes,
         vehicleType: {
           id: vehicle.vehicleType.id,

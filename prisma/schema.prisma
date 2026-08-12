@@ -163,6 +163,8 @@ model Vehicle {
   currentOdometer Int          @default(0)
   driverId       String?
   status         EntityStatus  @default(ACTIVE)
+  vehicleDate    DateTime      @default(now())
+  location       String?
   notes          String?
   photoPath      String?
   createdAt      DateTime      @default(now())

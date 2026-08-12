@@ -25,6 +25,7 @@ export type LayoutPosition = {
     id: string;
     internalId: string;
     status: string;
+    factoryFitted: boolean;
     tyreModel: { id: string; brand: string; name: string; size: string };
     currentInstallation: {
       id: string;
@@ -56,6 +57,8 @@ type Vehicle = {
   registrationNo: string;
   currentOdometer: number;
   status: "ACTIVE" | "INACTIVE" | "ARCHIVED";
+  vehicleDate: string;
+  location: string | null;
   notes: string | null;
   vehicleType: { id: string; name: string; tyreCount: number };
   driver: Driver | null;
@@ -129,6 +132,8 @@ export function VehicleDetailClient({
   };
 
   const installedCount = layoutState.filter((p) => p.currentTyre).length;
+  const allFactoryFitted =
+    installedCount > 0 && layoutState.every((p) => !p.currentTyre || p.currentTyre.factoryFitted);
 
   return (
     <div>
@@ -150,6 +155,12 @@ export function VehicleDetailClient({
               {vehicleState.vehicleType.name} · {vehicleState.vehicleType.tyreCount} tyres
             </p>
             <p className="text-sm text-muted mt-0.5">
+              Vehicle Date: {formatDate(vehicleState.vehicleDate)}
+            </p>
+            {vehicleState.location && (
+              <p className="text-sm text-muted mt-0.5">Location: {vehicleState.location}</p>
+            )}
+            <p className="text-sm text-muted mt-0.5">
               Odometer: {formatKm(vehicleState.currentOdometer)}
             </p>
             {vehicleState.driver && (
@@ -164,9 +175,19 @@ export function VehicleDetailClient({
               {installedCount}
               <span className="text-sm font-normal text-muted">/{vehicleState.vehicleType.tyreCount}</span>
             </p>
-            <p className="text-xs text-muted">tyres installed</p>
+            <p className="text-xs text-muted">tyres fitted</p>
           </div>
         </div>
+        {allFactoryFitted && (
+          <div className="flex items-center gap-2 mt-3 rounded-lg bg-primary-soft/60 border border-primary/20 px-3 py-2 text-xs text-foreground">
+            <Icon name="check-circle-2" size={14} className="text-primary shrink-0" />
+            <span>
+              <span className="font-semibold">Tyre status: factory-fitted tyres.</span>{" "}
+              These company-fitted tyres came with the vehicle and do not affect tyre
+              inventory or expenditure.
+            </span>
+          </div>
+        )}
       </div>
 
       {vehicleState.status !== "ACTIVE" && (
@@ -296,6 +317,9 @@ function PositionCard({
           {tyre.tyreModel.brand} {tyre.tyreModel.name}
         </p>
       )}
+      {tyre?.factoryFitted && (
+        <p className="text-[10px] font-medium text-primary mt-1">Factory-fitted</p>
+      )}
     </button>
   );
 }
@@ -327,11 +351,24 @@ function PositionView({
       {tyre && inst ? (
         <div className="space-y-3">
           <div className="bg-surface border border-border rounded-lg p-3">
-            <p className="text-xs text-muted">Current Tyre</p>
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-xs text-muted">Current Tyre</p>
+              {tyre.factoryFitted && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-primary-soft border border-primary/25 px-2 py-0.5 text-[10px] font-medium text-primary">
+                  <Icon name="check-circle-2" size={11} />
+                  Factory-fitted
+                </span>
+              )}
+            </div>
             <p className="text-base font-semibold text-foreground">{tyre.internalId}</p>
             <p className="text-sm text-muted">
               {tyre.tyreModel.brand} {tyre.tyreModel.name} · {tyre.tyreModel.size}
             </p>
+            {tyre.factoryFitted && (
+              <p className="text-xs text-muted mt-1">
+                Company-fitted tyre — not purchased from inventory.
+              </p>
+            )}
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-surface border border-border rounded-lg p-3">

@@ -2122,6 +2122,8 @@ export const VehicleScalarFieldEnum = {
   currentOdometer: 'currentOdometer',
   driverId: 'driverId',
   status: 'status',
+  vehicleDate: 'vehicleDate',
+  location: 'location',
   notes: 'notes',
   photoPath: 'photoPath',
   createdAt: 'createdAt',

@@ -41,6 +41,8 @@ export type VehicleMinAggregateOutputType = {
   currentOdometer: number | null
   driverId: string | null
   status: $Enums.EntityStatus | null
+  vehicleDate: Date | null
+  location: string | null
   notes: string | null
   photoPath: string | null
   createdAt: Date | null
@@ -54,6 +56,8 @@ export type VehicleMaxAggregateOutputType = {
   currentOdometer: number | null
   driverId: string | null
   status: $Enums.EntityStatus | null
+  vehicleDate: Date | null
+  location: string | null
   notes: string | null
   photoPath: string | null
   createdAt: Date | null
@@ -67,6 +71,8 @@ export type VehicleCountAggregateOutputType = {
   currentOdometer: number
   driverId: number
   status: number
+  vehicleDate: number
+  location: number
   notes: number
   photoPath: number
   createdAt: number
@@ -90,6 +96,8 @@ export type VehicleMinAggregateInputType = {
   currentOdometer?: true
   driverId?: true
   status?: true
+  vehicleDate?: true
+  location?: true
   notes?: true
   photoPath?: true
   createdAt?: true
@@ -103,6 +111,8 @@ export type VehicleMaxAggregateInputType = {
   currentOdometer?: true
   driverId?: true
   status?: true
+  vehicleDate?: true
+  location?: true
   notes?: true
   photoPath?: true
   createdAt?: true
@@ -116,6 +126,8 @@ export type VehicleCountAggregateInputType = {
   currentOdometer?: true
   driverId?: true
   status?: true
+  vehicleDate?: true
+  location?: true
   notes?: true
   photoPath?: true
   createdAt?: true
@@ -216,6 +228,8 @@ export type VehicleGroupByOutputType = {
   currentOdometer: number
   driverId: string | null
   status: $Enums.EntityStatus
+  vehicleDate: Date
+  location: string | null
   notes: string | null
   photoPath: string | null
   createdAt: Date
@@ -252,6 +266,8 @@ export type VehicleWhereInput = {
   currentOdometer?: Prisma.IntFilter<"Vehicle"> | number
   driverId?: Prisma.StringNullableFilter<"Vehicle"> | string | null
   status?: Prisma.EnumEntityStatusFilter<"Vehicle"> | $Enums.EntityStatus
+  vehicleDate?: Prisma.DateTimeFilter<"Vehicle"> | Date | string
+  location?: Prisma.StringNullableFilter<"Vehicle"> | string | null
   notes?: Prisma.StringNullableFilter<"Vehicle"> | string | null
   photoPath?: Prisma.StringNullableFilter<"Vehicle"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Vehicle"> | Date | string
@@ -272,6 +288,8 @@ export type VehicleOrderByWithRelationInput = {
   currentOdometer?: Prisma.SortOrder
   driverId?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
+  vehicleDate?: Prisma.SortOrder
+  location?: Prisma.SortOrderInput | Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   photoPath?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -295,6 +313,8 @@ export type VehicleWhereUniqueInput = Prisma.AtLeast<{
   currentOdometer?: Prisma.IntFilter<"Vehicle"> | number
   driverId?: Prisma.StringNullableFilter<"Vehicle"> | string | null
   status?: Prisma.EnumEntityStatusFilter<"Vehicle"> | $Enums.EntityStatus
+  vehicleDate?: Prisma.DateTimeFilter<"Vehicle"> | Date | string
+  location?: Prisma.StringNullableFilter<"Vehicle"> | string | null
   notes?: Prisma.StringNullableFilter<"Vehicle"> | string | null
   photoPath?: Prisma.StringNullableFilter<"Vehicle"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Vehicle"> | Date | string
@@ -315,6 +335,8 @@ export type VehicleOrderByWithAggregationInput = {
   currentOdometer?: Prisma.SortOrder
   driverId?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
+  vehicleDate?: Prisma.SortOrder
+  location?: Prisma.SortOrderInput | Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   photoPath?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -336,6 +358,8 @@ export type VehicleScalarWhereWithAggregatesInput = {
   currentOdometer?: Prisma.IntWithAggregatesFilter<"Vehicle"> | number
   driverId?: Prisma.StringNullableWithAggregatesFilter<"Vehicle"> | string | null
   status?: Prisma.EnumEntityStatusWithAggregatesFilter<"Vehicle"> | $Enums.EntityStatus
+  vehicleDate?: Prisma.DateTimeWithAggregatesFilter<"Vehicle"> | Date | string
+  location?: Prisma.StringNullableWithAggregatesFilter<"Vehicle"> | string | null
   notes?: Prisma.StringNullableWithAggregatesFilter<"Vehicle"> | string | null
   photoPath?: Prisma.StringNullableWithAggregatesFilter<"Vehicle"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Vehicle"> | Date | string
@@ -347,6 +371,8 @@ export type VehicleCreateInput = {
   registrationNo: string
   currentOdometer?: number
   status?: $Enums.EntityStatus
+  vehicleDate?: Date | string
+  location?: string | null
   notes?: string | null
   photoPath?: string | null
   createdAt?: Date | string
@@ -367,6 +393,8 @@ export type VehicleUncheckedCreateInput = {
   currentOdometer?: number
   driverId?: string | null
   status?: $Enums.EntityStatus
+  vehicleDate?: Date | string
+  location?: string | null
   notes?: string | null
   photoPath?: string | null
   createdAt?: Date | string
@@ -383,6 +411,8 @@ export type VehicleUpdateInput = {
   registrationNo?: Prisma.StringFieldUpdateOperationsInput | string
   currentOdometer?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  vehicleDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   photoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -403,6 +433,8 @@ export type VehicleUncheckedUpdateInput = {
   currentOdometer?: Prisma.IntFieldUpdateOperationsInput | number
   driverId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  vehicleDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   photoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -421,6 +453,8 @@ export type VehicleCreateManyInput = {
   currentOdometer?: number
   driverId?: string | null
   status?: $Enums.EntityStatus
+  vehicleDate?: Date | string
+  location?: string | null
   notes?: string | null
   photoPath?: string | null
   createdAt?: Date | string
@@ -432,6 +466,8 @@ export type VehicleUpdateManyMutationInput = {
   registrationNo?: Prisma.StringFieldUpdateOperationsInput | string
   currentOdometer?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  vehicleDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   photoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -445,6 +481,8 @@ export type VehicleUncheckedUpdateManyInput = {
   currentOdometer?: Prisma.IntFieldUpdateOperationsInput | number
   driverId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  vehicleDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   photoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -468,6 +506,8 @@ export type VehicleCountOrderByAggregateInput = {
   currentOdometer?: Prisma.SortOrder
   driverId?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  vehicleDate?: Prisma.SortOrder
+  location?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   photoPath?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -485,6 +525,8 @@ export type VehicleMaxOrderByAggregateInput = {
   currentOdometer?: Prisma.SortOrder
   driverId?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  vehicleDate?: Prisma.SortOrder
+  location?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   photoPath?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -498,6 +540,8 @@ export type VehicleMinOrderByAggregateInput = {
   currentOdometer?: Prisma.SortOrder
   driverId?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  vehicleDate?: Prisma.SortOrder
+  location?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   photoPath?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -683,6 +727,8 @@ export type VehicleCreateWithoutVehicleTypeInput = {
   registrationNo: string
   currentOdometer?: number
   status?: $Enums.EntityStatus
+  vehicleDate?: Date | string
+  location?: string | null
   notes?: string | null
   photoPath?: string | null
   createdAt?: Date | string
@@ -701,6 +747,8 @@ export type VehicleUncheckedCreateWithoutVehicleTypeInput = {
   currentOdometer?: number
   driverId?: string | null
   status?: $Enums.EntityStatus
+  vehicleDate?: Date | string
+  location?: string | null
   notes?: string | null
   photoPath?: string | null
   createdAt?: Date | string
@@ -747,6 +795,8 @@ export type VehicleScalarWhereInput = {
   currentOdometer?: Prisma.IntFilter<"Vehicle"> | number
   driverId?: Prisma.StringNullableFilter<"Vehicle"> | string | null
   status?: Prisma.EnumEntityStatusFilter<"Vehicle"> | $Enums.EntityStatus
+  vehicleDate?: Prisma.DateTimeFilter<"Vehicle"> | Date | string
+  location?: Prisma.StringNullableFilter<"Vehicle"> | string | null
   notes?: Prisma.StringNullableFilter<"Vehicle"> | string | null
   photoPath?: Prisma.StringNullableFilter<"Vehicle"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Vehicle"> | Date | string
@@ -758,6 +808,8 @@ export type VehicleCreateWithoutDriverInput = {
   registrationNo: string
   currentOdometer?: number
   status?: $Enums.EntityStatus
+  vehicleDate?: Date | string
+  location?: string | null
   notes?: string | null
   photoPath?: string | null
   createdAt?: Date | string
@@ -776,6 +828,8 @@ export type VehicleUncheckedCreateWithoutDriverInput = {
   vehicleTypeId: string
   currentOdometer?: number
   status?: $Enums.EntityStatus
+  vehicleDate?: Date | string
+  location?: string | null
   notes?: string | null
   photoPath?: string | null
   createdAt?: Date | string
@@ -817,6 +871,8 @@ export type VehicleCreateWithoutCurrentTyresInput = {
   registrationNo: string
   currentOdometer?: number
   status?: $Enums.EntityStatus
+  vehicleDate?: Date | string
+  location?: string | null
   notes?: string | null
   photoPath?: string | null
   createdAt?: Date | string
@@ -836,6 +892,8 @@ export type VehicleUncheckedCreateWithoutCurrentTyresInput = {
   currentOdometer?: number
   driverId?: string | null
   status?: $Enums.EntityStatus
+  vehicleDate?: Date | string
+  location?: string | null
   notes?: string | null
   photoPath?: string | null
   createdAt?: Date | string
@@ -867,6 +925,8 @@ export type VehicleUpdateWithoutCurrentTyresInput = {
   registrationNo?: Prisma.StringFieldUpdateOperationsInput | string
   currentOdometer?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  vehicleDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   photoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -886,6 +946,8 @@ export type VehicleUncheckedUpdateWithoutCurrentTyresInput = {
   currentOdometer?: Prisma.IntFieldUpdateOperationsInput | number
   driverId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  vehicleDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   photoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -901,6 +963,8 @@ export type VehicleCreateWithoutInstallationsInput = {
   registrationNo: string
   currentOdometer?: number
   status?: $Enums.EntityStatus
+  vehicleDate?: Date | string
+  location?: string | null
   notes?: string | null
   photoPath?: string | null
   createdAt?: Date | string
@@ -920,6 +984,8 @@ export type VehicleUncheckedCreateWithoutInstallationsInput = {
   currentOdometer?: number
   driverId?: string | null
   status?: $Enums.EntityStatus
+  vehicleDate?: Date | string
+  location?: string | null
   notes?: string | null
   photoPath?: string | null
   createdAt?: Date | string
@@ -951,6 +1017,8 @@ export type VehicleUpdateWithoutInstallationsInput = {
   registrationNo?: Prisma.StringFieldUpdateOperationsInput | string
   currentOdometer?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  vehicleDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   photoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -970,6 +1038,8 @@ export type VehicleUncheckedUpdateWithoutInstallationsInput = {
   currentOdometer?: Prisma.IntFieldUpdateOperationsInput | number
   driverId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  vehicleDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   photoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -985,6 +1055,8 @@ export type VehicleCreateWithoutOdometerReadingsInput = {
   registrationNo: string
   currentOdometer?: number
   status?: $Enums.EntityStatus
+  vehicleDate?: Date | string
+  location?: string | null
   notes?: string | null
   photoPath?: string | null
   createdAt?: Date | string
@@ -1004,6 +1076,8 @@ export type VehicleUncheckedCreateWithoutOdometerReadingsInput = {
   currentOdometer?: number
   driverId?: string | null
   status?: $Enums.EntityStatus
+  vehicleDate?: Date | string
+  location?: string | null
   notes?: string | null
   photoPath?: string | null
   createdAt?: Date | string
@@ -1035,6 +1109,8 @@ export type VehicleUpdateWithoutOdometerReadingsInput = {
   registrationNo?: Prisma.StringFieldUpdateOperationsInput | string
   currentOdometer?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  vehicleDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   photoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1054,6 +1130,8 @@ export type VehicleUncheckedUpdateWithoutOdometerReadingsInput = {
   currentOdometer?: Prisma.IntFieldUpdateOperationsInput | number
   driverId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  vehicleDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   photoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1069,6 +1147,8 @@ export type VehicleCreateWithoutExpendituresInput = {
   registrationNo: string
   currentOdometer?: number
   status?: $Enums.EntityStatus
+  vehicleDate?: Date | string
+  location?: string | null
   notes?: string | null
   photoPath?: string | null
   createdAt?: Date | string
@@ -1088,6 +1168,8 @@ export type VehicleUncheckedCreateWithoutExpendituresInput = {
   currentOdometer?: number
   driverId?: string | null
   status?: $Enums.EntityStatus
+  vehicleDate?: Date | string
+  location?: string | null
   notes?: string | null
   photoPath?: string | null
   createdAt?: Date | string
@@ -1119,6 +1201,8 @@ export type VehicleUpdateWithoutExpendituresInput = {
   registrationNo?: Prisma.StringFieldUpdateOperationsInput | string
   currentOdometer?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  vehicleDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   photoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1138,6 +1222,8 @@ export type VehicleUncheckedUpdateWithoutExpendituresInput = {
   currentOdometer?: Prisma.IntFieldUpdateOperationsInput | number
   driverId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  vehicleDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   photoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1153,6 +1239,8 @@ export type VehicleCreateWithoutActivityLogsInput = {
   registrationNo: string
   currentOdometer?: number
   status?: $Enums.EntityStatus
+  vehicleDate?: Date | string
+  location?: string | null
   notes?: string | null
   photoPath?: string | null
   createdAt?: Date | string
@@ -1172,6 +1260,8 @@ export type VehicleUncheckedCreateWithoutActivityLogsInput = {
   currentOdometer?: number
   driverId?: string | null
   status?: $Enums.EntityStatus
+  vehicleDate?: Date | string
+  location?: string | null
   notes?: string | null
   photoPath?: string | null
   createdAt?: Date | string
@@ -1203,6 +1293,8 @@ export type VehicleUpdateWithoutActivityLogsInput = {
   registrationNo?: Prisma.StringFieldUpdateOperationsInput | string
   currentOdometer?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  vehicleDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   photoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1222,6 +1314,8 @@ export type VehicleUncheckedUpdateWithoutActivityLogsInput = {
   currentOdometer?: Prisma.IntFieldUpdateOperationsInput | number
   driverId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  vehicleDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   photoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1238,6 +1332,8 @@ export type VehicleCreateManyVehicleTypeInput = {
   currentOdometer?: number
   driverId?: string | null
   status?: $Enums.EntityStatus
+  vehicleDate?: Date | string
+  location?: string | null
   notes?: string | null
   photoPath?: string | null
   createdAt?: Date | string
@@ -1249,6 +1345,8 @@ export type VehicleUpdateWithoutVehicleTypeInput = {
   registrationNo?: Prisma.StringFieldUpdateOperationsInput | string
   currentOdometer?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  vehicleDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   photoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1267,6 +1365,8 @@ export type VehicleUncheckedUpdateWithoutVehicleTypeInput = {
   currentOdometer?: Prisma.IntFieldUpdateOperationsInput | number
   driverId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  vehicleDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   photoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1284,6 +1384,8 @@ export type VehicleUncheckedUpdateManyWithoutVehicleTypeInput = {
   currentOdometer?: Prisma.IntFieldUpdateOperationsInput | number
   driverId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  vehicleDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   photoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1296,6 +1398,8 @@ export type VehicleCreateManyDriverInput = {
   vehicleTypeId: string
   currentOdometer?: number
   status?: $Enums.EntityStatus
+  vehicleDate?: Date | string
+  location?: string | null
   notes?: string | null
   photoPath?: string | null
   createdAt?: Date | string
@@ -1307,6 +1411,8 @@ export type VehicleUpdateWithoutDriverInput = {
   registrationNo?: Prisma.StringFieldUpdateOperationsInput | string
   currentOdometer?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  vehicleDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   photoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1325,6 +1431,8 @@ export type VehicleUncheckedUpdateWithoutDriverInput = {
   vehicleTypeId?: Prisma.StringFieldUpdateOperationsInput | string
   currentOdometer?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  vehicleDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   photoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1342,6 +1450,8 @@ export type VehicleUncheckedUpdateManyWithoutDriverInput = {
   vehicleTypeId?: Prisma.StringFieldUpdateOperationsInput | string
   currentOdometer?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  vehicleDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   photoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1422,6 +1532,8 @@ export type VehicleSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   currentOdometer?: boolean
   driverId?: boolean
   status?: boolean
+  vehicleDate?: boolean
+  location?: boolean
   notes?: boolean
   photoPath?: boolean
   createdAt?: boolean
@@ -1443,6 +1555,8 @@ export type VehicleSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   currentOdometer?: boolean
   driverId?: boolean
   status?: boolean
+  vehicleDate?: boolean
+  location?: boolean
   notes?: boolean
   photoPath?: boolean
   createdAt?: boolean
@@ -1458,6 +1572,8 @@ export type VehicleSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   currentOdometer?: boolean
   driverId?: boolean
   status?: boolean
+  vehicleDate?: boolean
+  location?: boolean
   notes?: boolean
   photoPath?: boolean
   createdAt?: boolean
@@ -1473,13 +1589,15 @@ export type VehicleSelectScalar = {
   currentOdometer?: boolean
   driverId?: boolean
   status?: boolean
+  vehicleDate?: boolean
+  location?: boolean
   notes?: boolean
   photoPath?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type VehicleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "registrationNo" | "vehicleTypeId" | "currentOdometer" | "driverId" | "status" | "notes" | "photoPath" | "createdAt" | "updatedAt", ExtArgs["result"]["vehicle"]>
+export type VehicleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "registrationNo" | "vehicleTypeId" | "currentOdometer" | "driverId" | "status" | "vehicleDate" | "location" | "notes" | "photoPath" | "createdAt" | "updatedAt", ExtArgs["result"]["vehicle"]>
 export type VehicleInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   vehicleType?: boolean | Prisma.VehicleTypeDefaultArgs<ExtArgs>
   driver?: boolean | Prisma.Vehicle$driverArgs<ExtArgs>
@@ -1517,6 +1635,8 @@ export type $VehiclePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     currentOdometer: number
     driverId: string | null
     status: $Enums.EntityStatus
+    vehicleDate: Date
+    location: string | null
     notes: string | null
     photoPath: string | null
     createdAt: Date
@@ -1957,6 +2077,8 @@ export interface VehicleFieldRefs {
   readonly currentOdometer: Prisma.FieldRef<"Vehicle", 'Int'>
   readonly driverId: Prisma.FieldRef<"Vehicle", 'String'>
   readonly status: Prisma.FieldRef<"Vehicle", 'EntityStatus'>
+  readonly vehicleDate: Prisma.FieldRef<"Vehicle", 'DateTime'>
+  readonly location: Prisma.FieldRef<"Vehicle", 'String'>
   readonly notes: Prisma.FieldRef<"Vehicle", 'String'>
   readonly photoPath: Prisma.FieldRef<"Vehicle", 'String'>
   readonly createdAt: Prisma.FieldRef<"Vehicle", 'DateTime'>
